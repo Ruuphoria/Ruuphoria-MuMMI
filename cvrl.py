@@ -188,3 +188,304 @@ class CVRL(tools.Module):
         rewards = data['reward']
         dones = tf.zeros_like(rewards)
         actions = data['action']
+
+        if self._c.use_sac:
+            self._sac._do_training(self._step, states, actions, rewards, dones)
+
+        if tf.distribute.get_replica_context().replica_id_in_sync_group == 0:
+            if self._c.log_scalars:
+                self._scalar_summaries(
+                    data, feat, prior_dist, post_dist, likes, div,
+                    model_loss, value_loss, actor_loss, model_norm, value_norm,
+                    actor_norm)
+            if tf.equal(log_images, True) and self._c.log_imgs:
+                self._image_summaries(data, embed, image_pred)
+
+    def _build_model(self):
+        acts = dict(elu=tf.nn.elu, relu=tf.nn.relu, swish=tf.nn.swish, leaky_relu=tf.nn.leaky_relu)
+        cnn_act = acts[self._c.cnn_act]
+        act = acts[self._c.dense_act]
+        self._encode_img = models.ConvEncoder(self._c.cnn_depth, cnn_act, modality="image")
+        self._encode_dep = models.ConvEncoder(self._c.cnn_depth, cnn_act, modality="depth")
+        self._encode_touch = models.Dense(n=4, d_hidden=256, d_out=1024, name="touch")
+
+        self._dynamics = models.RSSM(
+            self._c.stoch_size, self._c.deter_size, self._c.deter_size)
+        self._decode_img = models.ConvDecoder(self._c.cnn_depth, cnn_act, modality="image")
+        self._decode_dep = models.ConvDecoder(self._c.cnn_depth, cnn_act, modality="depth")
+        self._contrastive = models.ContrastiveObsModel(self._c.deter_size, self._c.deter_size * 2)
+        self._reward = models.DenseDecoder((), 2, self._c.num_units, act=act)
+        if self._c.pcont:
+            self._pcont = models.DenseDecoder(
+                (), 3, self._c.num_units, 'binary', act=act)
+        self._value = models.DenseDecoder((), 3, self._c.num_units, act=act)
+        self._Qs = [models.QNetwork(3, self._c.num_units, act=act) for _ in range(self._c.num_Qs)]
+        self._actor = models.ActionDecoder(
+            self._actdim, 4, self._c.num_units, self._c.action_dist,
+            init_std=self._c.action_init_std, act=act)
+        model_modules = [self._encode_img, self._encode_dep, self._encode_touch, # self._encode_audio,
+                         self._dynamics, self._contrastive, self._reward]
+        if self._c.pcont:
+            model_modules.append(self._pcont)
+        Optimizer = functools.partial(
+            tools.Adam, wd=self._c.weight_decay, clip=self._c.grad_clip,
+            wdpattern=self._c.weight_decay_pattern)
+        self._model_opt = Optimizer('model', model_modules, self._c.model_lr)
+        self._value_opt = Optimizer('value', [self._value], self._c.value_lr)
+        self._actor_opt = Optimizer('actor', [self._actor], self._c.actor_lr)
+        self._q_opts = [Optimizer('qs', [qnet], self._c.value_lr) for qnet in self._Qs]
+
+        if self._c.use_sac:  #
+            self._sac = soft_actor_critic.SAC(self._actor, self._Qs, self._actor_opt, self._q_opts, self._actspace)
+
+        # Do a train step to initialize all variables, including optimizer
+        # statistics. Ideally, we would use batch size zero, but that doesn't work
+        # in multi-GPU mode.
+        self.train(next(self._dataset))
+
+    def _exploration(self, action, training):
+        if training:
+            amount = self._c.expl_amount
+            if self._c.expl_decay:
+                amount *= 0.5 ** (tf.cast(self._step,
+                                          tf.float32) / self._c.expl_decay)
+            if self._c.expl_min:
+                amount = tf.maximum(self._c.expl_min, amount)
+            self._metrics['expl_amount'].update_state(amount)
+        elif self._c.eval_noise:
+            amount = self._c.eval_noise
+        else:
+            return action
+        if self._c.expl == 'additive_gaussian':
+            return tf.clip_by_value(tfd.Normal(action, amount).sample(), -1, 1)
+        if self._c.expl == 'completely_random':
+            return tf.random.uniform(action.shape, -1, 1)
+        if self._c.expl == 'epsilon_greedy':
+            indices = tfd.Categorical(0 * action).sample()
+            return tf.where(
+                tf.random.uniform(action.shape[:1], 0, 1) < amount,
+                tf.one_hot(indices, action.shape[-1], dtype=self._float),
+                action)
+        raise NotImplementedError(self._c.expl)
+
+    def _imagine_ahead(self, post):
+        if self._c.pcont:  # Last step could be terminal.
+            post = {k: v[:, :-1] for k, v in post.items()}
+
+        def flatten(x): return tf.reshape(x, [-1] + list(x.shape[2:]))
+
+        start = {k: flatten(v) for k, v in post.items()}
+
+        def policy(state): return self._actor(
+            tf.stop_gradient(self._dynamics.get_feat(state))).sample()
+
+        states = tools.static_scan(
+            lambda prev, _: self._dynamics.img_step(prev, policy(prev)),
+            tf.range(self._c.horizon), start)
+        imag_feat = self._dynamics.get_feat(states)
+        return imag_feat
+
+    def _forward_search_policy(self, post):
+        # [1, size]
+
+        def policy(state):
+            return self._actor(
+                tf.stop_gradient(self._dynamics.get_feat(state))).sample()
+
+        def repeat(x):
+            return tf.repeat(x, self._c.num_samples, axis=0)
+
+        start = {k: repeat(v) for k, v in post.items()}
+        states, actions = tools.static_scan_action(
+            lambda prev, action, _: self._dynamics.img_step(prev, action),
+            lambda prev: policy(prev),
+            tf.range(self._c.horizon), start)
+
+        feat = self._dynamics.get_feat(states)
+        reward = self._reward(feat).mode()
+
+        if self._c.pcont:
+            pcont = self._pcont(feat).mean()
+        else:
+            pcont = self._c.discount * tf.ones_like(reward)
+        value = self._value(feat).mode()
+        returns = tools.lambda_return(
+            reward[:-1], value[:-1], pcont[:-1],
+            bootstrap=value[-1], lambda_=self._c.disclam, axis=0)
+
+        idx = tf.argmax(returns[0])
+        act = actions[idx][None, :]
+        return act
+
+    def _trajectory_optimization(self, post):
+        # [1, size]
+
+        def policy(state):
+            return self._actor(
+                tf.stop_gradient(self._dynamics.get_feat(state))).sample()
+
+        def repeat(x):
+            return tf.repeat(x, self._c.num_samples, axis=0)
+
+        states, actions = tools.static_scan_action(
+            lambda prev, action, _: self._dynamics.img_step(prev, action),
+            lambda prev: policy(prev),
+            tf.range(self._c.horizon), post)
+
+        feat = self._dynamics.get_feat(states)
+        reward = self._reward(feat).mode()
+
+        if self._c.pcont:
+            pcont = self._pcont(feat).mean()
+        else:
+            pcont = self._c.discount * tf.ones_like(reward)
+        value = self._value(feat).mode()
+        returns = tools.lambda_return(
+            reward[:-1], value[:-1], pcont[:-1],
+            bootstrap=value[-1], lambda_=self._c.disclam, axis=0)
+
+        accumulated_reward = returns[0, 0]
+        grad = tf.gradients(accumulated_reward, actions)[0]
+        act = actions + grad * self._c.traj_opt_lr
+
+        return act
+
+    def _scalar_summaries(
+            self, data, feat, prior_dist, post_dist, likes, div,
+            model_loss, value_loss, actor_loss, model_norm, value_norm,
+            actor_norm):
+        self._metrics['model_grad_norm'].update_state(model_norm)
+        self._metrics['value_grad_norm'].update_state(value_norm)
+        self._metrics['actor_grad_norm'].update_state(actor_norm)
+        self._metrics['prior_ent'].update_state(prior_dist.entropy())
+        self._metrics['post_ent'].update_state(post_dist.entropy())
+        for name, logprob in likes.items():
+            self._metrics[name + '_loss'].update_state(-logprob)
+        self._metrics['div'].update_state(div)
+        self._metrics['model_loss'].update_state(model_loss)
+        self._metrics['value_loss'].update_state(value_loss)
+        self._metrics['actor_loss'].update_state(actor_loss)
+        self._metrics['action_ent'].update_state(self._actor(feat).entropy())
+
+    def _image_summaries(self, data, embed, image_pred):
+        truth = data['image'][:6] + 0.5
+        recon = image_pred.mode()[:6]
+        init, _ = self._dynamics.observe(embed[:6, :5], data['action'][:6, :5])
+        init = {k: v[:, -1] for k, v in init.items()}
+        prior = self._dynamics.imagine(data['action'][:6, 5:], init)
+        openl = self._decode_img(self._dynamics.get_feat(prior)).mode()
+        model = tf.concat([recon[:, :5] + 0.5, openl + 0.5], 1)
+        error = (model - truth + 1) / 2
+        openl = tf.concat([truth, model, error], 2)
+        tools.graph_summary(
+            self._writer, tools.video_summary, 'agent/openl', openl)
+
+    def _write_summaries(self):
+        step = int(self._step.numpy())
+        metrics = [(k, float(v.result())) for k, v in self._metrics.items()]
+        if self._last_log is not None:
+            duration = time.time() - self._last_time
+            self._last_time += duration
+            metrics.append(('fps', (step - self._last_log) / duration))
+        self._last_log = step
+        [m.reset_states() for m in self._metrics.values()]
+        with (self._c.logdir / 'metrics.jsonl').open('a') as f:
+            f.write(json.dumps({'step': step, **dict(metrics)}) + '\n')
+        [tf.summary.scalar('agent/' + k, m) for k, m in metrics]
+        print(f'[{step}]', ' / '.join(f'{k} {v:.1f}' for k, v in metrics))
+        self._writer.flush()
+
+
+def preprocess(obs, config):
+    dtype = prec.global_policy().compute_dtype
+    obs = obs.copy()
+    with tf.device('cpu:0'):
+        obs['image'] = tf.cast(obs['image'], dtype) / 255.0 - 0.5
+        obs['depth'] = tf.cast(obs['depth'], dtype) / 200.0 - 0.5
+        obs['touch'] = tf.cast(obs['touch'], dtype)
+        # obs['audio'] = tf.cast(obs['audio'], dtype) / 10240.0
+        clip_rewards = dict(none=lambda x: x, tanh=tf.tanh)[
+            config.clip_rewards]
+        obs['reward'] = clip_rewards(obs['reward'])
+    return obs
+
+
+def count_steps(datadir, config):
+    return tools.count_episodes(datadir)[1] * config.action_repeat
+
+
+def load_dataset(directory, config):
+    episode = next(tools.load_episodes(directory, 1))
+    types = {k: v.dtype for k, v in episode.items()}
+    shapes = {k: (None,) + v.shape[1:] for k, v in episode.items()}
+
+    def generator(): return tools.load_episodes(
+        directory, config.train_steps, config.batch_length,
+        config.dataset_balance)
+
+    dataset = tf.data.Dataset.from_generator(generator, types, shapes)
+    dataset = dataset.batch(config.batch_size, drop_remainder=True)
+    dataset = dataset.map(functools.partial(preprocess, config=config))
+    dataset = dataset.prefetch(10)
+    return dataset
+
+
+def summarize_episode(episode, config, datadir, writer, prefix):
+    episodes, steps = tools.count_episodes(datadir)
+    length = (len(episode['reward']) - 1) * config.action_repeat
+    ret = episode['reward'].sum()
+    print(f'{prefix.title()} episode of length {length} with return {ret:.1f}.')
+    metrics = [
+        (f'{prefix}/return', float(episode['reward'].sum())),
+        (f'{prefix}/length', len(episode['reward']) - 1),
+        (f'episodes', episodes)]
+    step = count_steps(datadir, config)
+    # with (config.logdir / 'metrics.jsonl').open('a') as f:
+    #     f.write(json.dumps(dict([('step', step)] + metrics)) + '\n')
+    if config.test:
+        with (config.logdir / 'results.jsonl').open('a') as f:
+            f.write(json.dumps(dict([('step', step)] + metrics)) + '\n')
+    else:
+        with (config.logdir / 'metrics.jsonl').open('a') as f:
+            f.write(json.dumps(dict([('step', step)] + metrics)) + '\n')
+    with writer.as_default():  # Env might run in a different thread.
+        tf.summary.experimental.set_step(step)
+        [tf.summary.scalar('sim/' + k, v) for k, v in metrics]
+        if prefix == 'test':
+            tools.video_summary(f'sim/{prefix}/video', episode['image'][None])
+
+
+def make_env(config, writer, prefix, datadir, train):
+    suite, task = config.task.split('_', 1)
+    if suite == 'dmc':
+        env = wrappers.DeepMindControl(task)
+        env = wrappers.ActionRepeat(env, config.action_repeat)
+        env = wrappers.NormalizeActions(env)
+        if config.natural:
+            data = tools.load_imgnet(train)
+            env = wrappers.NaturalMujoco(env, data)
+            audio_data = tools.load_audio(train)
+            env = wrappers.AudioMujoco(env, audio_data)
+            env = wrappers.MissingMultimodal(env, config)
+    elif suite == 'atari':
+        env = wrappers.Atari(
+            task, config.action_repeat, (64, 64), grayscale=False,
+            life_done=True, sticky_actions=True)
+        env = wrappers.OneHotAction(env)
+    else:
+        raise NotImplementedError(suite)
+    env = wrappers.TimeLimit(env, config.time_limit / config.action_repeat)
+    callbacks = []
+    if train:
+        callbacks.append(lambda ep: tools.save_episodes(datadir, [ep]))
+    callbacks.append(
+        lambda ep: summarize_episode(ep, config, datadir, writer, prefix))
+    env = wrappers.Collect(env, callbacks, config.precision)
+    env = wrappers.RewardObs(env)
+    return env
+
+
+def main(config):
+    if config.gpu_growth:
+        for gpu in tf.config.experimental.list_physical_devices('GPU'):
+            tf.config.experimental.set_memory_growth(gpu, True)
