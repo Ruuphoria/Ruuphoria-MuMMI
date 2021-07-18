@@ -489,3 +489,129 @@ def main(config):
     if config.gpu_growth:
         for gpu in tf.config.experimental.list_physical_devices('GPU'):
             tf.config.experimental.set_memory_growth(gpu, True)
+    assert config.precision in (16, 32), config.precision
+    if config.precision == 16:
+        prec.set_policy(prec.Policy('mixed_float16'))
+    config.steps = int(config.steps)
+    config.logdir.mkdir(parents=True, exist_ok=True)
+    print('Logdir', config.logdir)
+
+    arg_dict = vars(config).copy()
+    del arg_dict['logdir']
+
+    with open(os.path.join(config.logdir, 'args.json'), 'w') as fout:
+        import json
+        json.dump(arg_dict, fout)
+
+    # Create environments.
+    datadir = config.logdir / 'episodes'
+    writer = tf.summary.create_file_writer(
+        str(config.logdir), max_queue=1000, flush_millis=20000)
+    writer.set_as_default()
+    train_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'train', datadir, train=True), config.parallel)
+                  for _ in range(config.envs)]
+    test_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'test', datadir, train=False), config.parallel)
+                 for _ in range(config.envs)]
+    actspace = train_envs[0].action_space
+
+    # Prefill dataset with random episodes.
+    step = count_steps(datadir, config)
+    prefill = max(0, config.prefill - step)
+    print(f'Prefill dataset with {prefill} steps.')
+
+    def random_agent(o, d, _):
+        return ([actspace.sample() for _ in d], None)
+
+    tools.simulate(random_agent, train_envs, prefill / config.action_repeat)
+    writer.flush()
+
+    # Train and regularly evaluate the agent.
+    step = count_steps(datadir, config)
+    print(f'Simulating agent for {config.steps - step} steps.')
+    agent = CVRL(config, datadir, actspace, writer)
+    if (config.logdir / 'variables.pkl').exists():
+        print('Load checkpoint.')
+        agent.load(config.logdir / 'variables.pkl')
+    state = None
+    while step < config.steps:
+        print('Start evaluation.')
+        tools.simulate(
+            functools.partial(agent, training=False), test_envs, episodes=1)
+        writer.flush()
+        print('Start collection.')
+        steps = config.eval_every // config.action_repeat
+        state = tools.simulate(agent, train_envs, steps, state=state)
+        step = count_steps(datadir, config)
+        agent.save(config.logdir / 'variables.pkl')
+    for env in train_envs + test_envs:
+        env.close()
+
+
+def test(config):
+    if config.gpu_growth:
+        for gpu in tf.config.experimental.list_physical_devices('GPU'):
+            tf.config.experimental.set_memory_growth(gpu, True)
+    assert config.precision in (16, 32), config.precision
+    if config.precision == 16:
+        prec.set_policy(prec.Policy('mixed_float16'))
+    config.steps = int(config.steps)
+    config.logdir.mkdir(parents=True, exist_ok=True)
+    print('Logdir', config.logdir)
+
+    # Create environments.
+    datadir = config.logdir / 'episodes'
+    writer = tf.summary.create_file_writer(
+        str(config.logdir), max_queue=1000, flush_millis=20000)
+    writer.set_as_default()
+    test_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'test', datadir, train=False), config.parallel)
+                 for _ in range(config.envs)]
+    actspace = test_envs[0].action_space
+
+    # Train and regularly evaluate the agent.
+    step = count_steps(datadir, config)
+    print(f'Simulating agent for {config.steps - step} steps.')
+    agent = CVRL(config, datadir, actspace, writer)
+    if (config.logdir / 'variables.pkl').exists():
+        print('Load checkpoint.')
+        agent.load(config.logdir / 'variables.pkl')
+
+    m_list = [0.0, 0.05, 0.1]
+    for miss_r in m_list:
+        config.miss_ratio = {"image": miss_r, "depth": miss_r, "touch": miss_r, "audio": miss_r}
+        test_envs = [wrappers.Async(lambda: make_env(
+            config, writer, 'test', datadir, train=False), config.parallel)
+                     for _ in range(config.envs)]
+        print('Missing Ratio:', miss_r)
+        n_traj = 10
+        for _ in range(n_traj):
+            print('Start evaluation.')
+            tools.simulate(
+                functools.partial(agent, training=False), test_envs, episodes=1)
+            writer.flush()
+        for env in test_envs:
+            env.close()
+
+        filename = config.logdir / 'results.jsonl'
+        cal_result(str(filename), n_traj)
+
+if __name__ == '__main__':
+    try:
+        import colored_traceback
+
+        colored_traceback.add_hook()
+    except ImportError:
+        pass
+    parser = argparse.ArgumentParser()
+    for key, value in define_config().items():
+        parser.add_argument(
+            f'--{key}', type=tools.args_type(value), default=value)
+    args = parser.parse_args()
+
+    config = parser.parse_args()
+    if config.test:
+        test(config)
+    else:
+        main(config)
