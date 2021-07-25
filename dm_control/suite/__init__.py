@@ -17,4 +17,17 @@
 
 from __future__ import absolute_import
 from __future__ import division
-from __future__ import prin
+from __future__ import print_function
+
+import collections
+import inspect
+import itertools
+
+from dm_control.rl import control
+
+from dm_control.suite import acrobot
+from dm_control.suite import ball_in_cup
+from dm_control.suite import cartpole
+from dm_control.suite import cheetah
+from dm_control.suite import dog
+from dm_
