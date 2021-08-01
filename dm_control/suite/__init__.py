@@ -47,4 +47,20 @@ from dm_control.suite import walker
 
 # Find all domains imported.
 _DOMAINS = {name: module for name, module in locals().items()
-            if inspect.ismodule(modu
+            if inspect.ismodule(module) and hasattr(module, 'SUITE')}
+
+
+def _get_tasks(tag):
+  """Returns a sequence of (domain name, task name) pairs for the given tag."""
+  result = []
+
+  for domain_name in sorted(_DOMAINS.keys()):
+
+    domain = _DOMAINS[domain_name]
+
+    if tag is None:
+      tasks_in_domain = domain.SUITE
+    else:
+      tasks_in_domain = domain.SUITE.tagged(tag)
+
+    for task_name in tasks_in
