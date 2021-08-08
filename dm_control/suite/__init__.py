@@ -63,4 +63,15 @@ def _get_tasks(tag):
     else:
       tasks_in_domain = domain.SUITE.tagged(tag)
 
-    for task_name in tasks_in
+    for task_name in tasks_in_domain.keys():
+      result.append((domain_name, task_name))
+
+  return tuple(result)
+
+
+def _get_tasks_by_domain(tasks):
+  """Returns a dict mapping from task name to a tuple of domain names."""
+  result = collections.defaultdict(list)
+
+  for domain_name, task_name in tasks:
+    result[domain
