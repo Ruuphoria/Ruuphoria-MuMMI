@@ -74,4 +74,15 @@ def _get_tasks_by_domain(tasks):
   result = collections.defaultdict(list)
 
   for domain_name, task_name in tasks:
-    result[domain
+    result[domain_name].append(task_name)
+
+  return {k: tuple(v) for k, v in result.items()}
+
+
+# A sequence containing all (domain name, task name) pairs.
+ALL_TASKS = _get_tasks(tag=None)
+
+# Subsets of ALL_TASKS, generated via the tag mechanism.
+BENCHMARKING = _get_tasks('benchmarking')
+EASY = _get_tasks('easy')
+HARD = _get_tasks('hard
