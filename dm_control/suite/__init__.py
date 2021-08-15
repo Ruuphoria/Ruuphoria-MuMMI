@@ -94,4 +94,14 @@ REWARD_VIZ = tuple(sorted(set(ALL_TASKS) - set(NO_REWARD_VIZ)))
 TASKS_BY_DOMAIN = _get_tasks_by_domain(ALL_TASKS)
 
 
-def load(domain_name, task_name, 
+def load(domain_name, task_name, task_kwargs=None, environment_kwargs=None,
+         visualize_reward=False):
+  """Returns an environment from a domain name, task name and optional settings.
+
+  ```python
+  env = suite.load('cartpole', 'balance')
+  ```
+
+  Args:
+    domain_name: A string containing the name of a domain.
+    task_name: A str
