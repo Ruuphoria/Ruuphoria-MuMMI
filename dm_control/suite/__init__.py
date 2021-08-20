@@ -104,4 +104,9 @@ def load(domain_name, task_name, task_kwargs=None, environment_kwargs=None,
 
   Args:
     domain_name: A string containing the name of a domain.
-    task_name: A str
+    task_name: A string containing the name of a task.
+    task_kwargs: Optional `dict` of keyword arguments for the task.
+    environment_kwargs: Optional `dict` specifying keyword arguments for the
+      environment.
+    visualize_reward: Optional `bool`. If `True`, object colours in rendered
+      frames are set to indicate the reward at each step. Default `False`.
