@@ -120,4 +120,10 @@ def load(domain_name, task_name, task_kwargs=None, environment_kwargs=None,
 
 def build_environment(domain_name, task_name, task_kwargs=None,
                       environment_kwargs=None, visualize_reward=False):
-  """Returns an environmen
+  """Returns an environment from the suite given a domain name and a task name.
+
+  Args:
+    domain_name: A string containing the name of a domain.
+    task_name: A string containing the name of a task.
+    task_kwargs: Optional `dict` specifying keyword arguments for the task.
+    environment_kwargs: Optional `dict` spe
