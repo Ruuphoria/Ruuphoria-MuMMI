@@ -110,3 +110,14 @@ def load(domain_name, task_name, task_kwargs=None, environment_kwargs=None,
       environment.
     visualize_reward: Optional `bool`. If `True`, object colours in rendered
       frames are set to indicate the reward at each step. Default `False`.
+
+  Returns:
+    The requested environment.
+  """
+  return build_environment(domain_name, task_name, task_kwargs,
+                           environment_kwargs, visualize_reward)
+
+
+def build_environment(domain_name, task_name, task_kwargs=None,
+                      environment_kwargs=None, visualize_reward=False):
+  """Returns an environmen
