@@ -146,4 +146,9 @@ def build_environment(domain_name, task_name, task_kwargs=None,
     raise ValueError('Level {!r} does not exist in domain {!r}.'.format(
         task_name, domain_name))
 
-  task_kw
+  task_kwargs = task_kwargs or {}
+  if environment_kwargs is not None:
+    task_kwargs = dict(task_kwargs, environment_kwargs=environment_kwargs)
+  env = domain.SUITE[task_name](**task_kwargs)
+  env.task.visualize_reward = visualize_reward
+  return env
