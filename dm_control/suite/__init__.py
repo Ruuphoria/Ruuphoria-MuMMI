@@ -135,4 +135,15 @@ def build_environment(domain_name, task_name, task_kwargs=None,
     ValueError: If the domain or task doesn't exist.
 
   Returns:
-    An instance of the requested envi
+    An instance of the requested environment.
+  """
+  if domain_name not in _DOMAINS:
+    raise ValueError('Domain {!r} does not exist.'.format(domain_name))
+
+  domain = _DOMAINS[domain_name]
+
+  if task_name not in domain.SUITE:
+    raise ValueError('Level {!r} does not exist in domain {!r}.'.format(
+        task_name, domain_name))
+
+  task_kw
