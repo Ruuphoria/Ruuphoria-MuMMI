@@ -40,4 +40,13 @@ def get_model_and_assets():
 
 @SUITE.add('benchmarking')
 def swingup(time_limit=_DEFAULT_TIME_LIMIT, random=None,
-            environment_kwargs=Non
+            environment_kwargs=None):
+  """Returns Acrobot balance task."""
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = Balance(sparse=False, random=random)
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+@SUITE.add('benchmarki
