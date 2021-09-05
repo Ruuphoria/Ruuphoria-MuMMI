@@ -30,4 +30,14 @@ from dm_control.utils import rewards
 import numpy as np
 
 _DEFAULT_TIME_LIMIT = 10
-SUIT
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('acrobot.xml'), common.ASSETS
+
+
+@SUITE.add('benchmarking')
+def swingup(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+            environment_kwargs=Non
