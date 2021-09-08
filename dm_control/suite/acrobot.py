@@ -55,4 +55,14 @@ def swingup_sparse(time_limit=_DEFAULT_TIME_LIMIT, random=None,
   """Returns Acrobot sparse balance."""
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = Balance(sparse=True, random=random)
-  environment_kwargs = environment_kwargs 
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the Acrobot domain."""
+
+  def horizontal(self):
+    """Returns horizontal (x) component of body frame z-axes."""
+    return self.named.data.xmat[['up
