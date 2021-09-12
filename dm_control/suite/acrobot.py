@@ -74,4 +74,13 @@ class Physics(mujoco.Physics):
   def to_target(self):
     """Returns the distance from the tip to the target."""
     tip_to_target = (self.named.data.site_xpos['target'] -
-   
+                     self.named.data.site_xpos['tip'])
+    return np.linalg.norm(tip_to_target)
+
+  def orientations(self):
+    """Returns the sines and cosines of the pole angles."""
+    return np.concatenate((self.horizontal(), self.vertical()))
+
+
+class Balance(base.Task):
+  """An Acrobot `Task` to
