@@ -65,4 +65,13 @@ class Physics(mujoco.Physics):
 
   def horizontal(self):
     """Returns horizontal (x) component of body frame z-axes."""
-    return self.named.data.xmat[['up
+    return self.named.data.xmat[['upper_arm', 'lower_arm'], 'xz']
+
+  def vertical(self):
+    """Returns vertical (z) component of body frame z-axes."""
+    return self.named.data.xmat[['upper_arm', 'lower_arm'], 'zz']
+
+  def to_target(self):
+    """Returns the distance from the tip to the target."""
+    tip_to_target = (self.named.data.site_xpos['target'] -
+   
