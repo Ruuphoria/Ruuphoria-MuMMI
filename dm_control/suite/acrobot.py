@@ -83,4 +83,12 @@ class Physics(mujoco.Physics):
 
 
 class Balance(base.Task):
-  """An Acrobot `Task` to
+  """An Acrobot `Task` to swing up and balance the pole."""
+
+  def __init__(self, sparse, random=None):
+    """Initializes an instance of `Balance`.
+
+    Args:
+      sparse: A `bool` specifying whether to use a sparse (indicator) reward.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for c
