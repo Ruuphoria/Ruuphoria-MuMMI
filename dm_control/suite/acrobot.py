@@ -91,4 +91,13 @@ class Balance(base.Task):
     Args:
       sparse: A `bool` specifying whether to use a sparse (indicator) reward.
       random: Optional, either a `numpy.random.RandomState` instance, an
-        integer seed for c
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    self._sparse = sparse
+    super(Balance, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode.
+
+    Shoulder and elbow are set to 
