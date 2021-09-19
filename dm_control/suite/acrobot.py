@@ -110,4 +110,13 @@ class Balance(base.Task):
     super(Balance, self).initialize_episode(physics)
 
   def get_observation(self, physics):
-    """Returns an observation of po
+    """Returns an observation of pole orientation and angular velocities."""
+    obs = collections.OrderedDict()
+    obs['orientations'] = physics.orientations()
+    obs['velocity'] = physics.velocity()
+    return obs
+
+  def _get_reward(self, physics, sparse):
+    target_radius = physics.named.model.site_size['target', 0]
+    return rewards.tolerance(physics.to_target(),
+              
