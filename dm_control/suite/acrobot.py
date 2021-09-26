@@ -119,4 +119,9 @@ class Balance(base.Task):
   def _get_reward(self, physics, sparse):
     target_radius = physics.named.model.site_size['target', 0]
     return rewards.tolerance(physics.to_target(),
-              
+                             bounds=(0, target_radius),
+                             margin=0 if sparse else 1)
+
+  def get_reward(self, physics):
+    """Returns a sparse or a smooth reward, as specified in the constructor."""
+    return self._get_reward(physics, sparse=self._sparse)
