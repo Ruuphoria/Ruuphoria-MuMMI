@@ -22,4 +22,17 @@ from __future__ import print_function
 import collections
 import numpy as np
 
-from dm_co
+from dm_control import mujoco
+from dm_control.rl import control
+from dm_control.suite import base
+from dm_control.suite import common
+from dm_control.utils import containers
+
+_DEFAULT_TIME_LIMIT = 20  # (seconds)
+_CONTROL_TIMESTEP = .02   # (seconds)
+
+
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets(
