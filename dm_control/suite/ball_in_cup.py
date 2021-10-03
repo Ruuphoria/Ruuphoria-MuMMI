@@ -35,4 +35,12 @@ _CONTROL_TIMESTEP = .02   # (seconds)
 SUITE = containers.TaggedTasks()
 
 
-def get_model_and_assets(
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('ball_in_cup.xml'), common.ASSETS
+
+
+@SUITE.add('benchmarking', 'easy')
+def catch(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
+  """Returns the Ball-in-Cup task."""
+  physics = Physics.from_xml_string(*
