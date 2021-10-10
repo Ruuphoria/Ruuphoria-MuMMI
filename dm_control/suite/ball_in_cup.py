@@ -54,4 +54,12 @@ def catch(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
 class Physics(mujoco.Physics):
   """Physics with additional features for the Ball-in-Cup domain."""
 
-  def ball_
+  def ball_to_target(self):
+    """Returns the vector from the ball to the target."""
+    target = self.named.data.site_xpos['target', ['x', 'z']]
+    ball = self.named.data.xpos['ball', ['x', 'z']]
+    return target - ball
+
+  def in_target(self):
+    """Returns 1 if the ball is in the target, 0 otherwise."""
+    ball_to_target = abs(self.ball
