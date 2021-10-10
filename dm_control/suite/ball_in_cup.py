@@ -62,4 +62,15 @@ class Physics(mujoco.Physics):
 
   def in_target(self):
     """Returns 1 if the ball is in the target, 0 otherwise."""
-    ball_to_target = abs(self.ball
+    ball_to_target = abs(self.ball_to_target())
+    target_size = self.named.model.site_size['target', [0, 2]]
+    ball_size = self.named.model.geom_size['ball', 0]
+    return float(all(ball_to_target < target_size - ball_size))
+
+  def touchs(self):
+    """Returns the touch signal."""
+    touch = self.named.data.sensordata['touch'][0]
+    return np.array([touch])
+
+
+class BallInCu
