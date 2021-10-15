@@ -73,4 +73,15 @@ class Physics(mujoco.Physics):
     return np.array([touch])
 
 
-class BallInCu
+class BallInCup(base.Task):
+  """The Ball-in-Cup task. Put the ball in the cup."""
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode.
+
+    Args:
+      physics: An instance of `Physics`.
+
+    """
+    # Find a collision-free random initial position of the ball.
+    penetrating = Tr
