@@ -84,4 +84,12 @@ class BallInCup(base.Task):
 
     """
     # Find a collision-free random initial position of the ball.
-    penetrating = Tr
+    penetrating = True
+    while penetrating:
+      # Assign a random ball position.
+      physics.named.data.qpos['ball_x'] = self.random.uniform(-.2, .2)
+      physics.named.data.qpos['ball_z'] = self.random.uniform(.2, .5)
+      # Check for collisions.
+      physics.after_reset()
+      penetrating = physics.data.ncon > 0
+    super(BallInCup, self).
