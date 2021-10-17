@@ -103,4 +103,5 @@ class BallInCup(base.Task):
     return obs
 
   def get_reward(self, physics):
-    "
+    """Returns a sparse reward."""
+    return physics.in_target()
