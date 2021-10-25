@@ -13,4 +13,17 @@
 # limitations under the License.
 # ============================================================================
 
-"""Cheetah Domain.""
+"""Cheetah Domain."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import collections
+
+from dm_control import mujoco
+from dm_control.rl import control
+from dm_control.suite import base
+from dm_control.suite import common
+from dm_control.utils import containers
+from dm
