@@ -26,4 +26,18 @@ from dm_control.rl import control
 from dm_control.suite import base
 from dm_control.suite import common
 from dm_control.utils import containers
-from dm
+from dm_control.utils import rewards
+
+
+# How long the simulation will run, in seconds.
+_DEFAULT_TIME_LIMIT = 10
+
+# Running speed above which reward is 1.
+_RUN_SPEED = 10
+
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  r
