@@ -48,4 +48,13 @@ def run(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
   """Returns the run task."""
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = Cheetah(random=random)
-  environment
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(physics, task, time_limit=time_limit,
+                             **environment_kwargs)
+
+
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the Cheetah domain."""
+
+  def speed(self):
+    """Returns the horizontal speed of the Chee
