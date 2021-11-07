@@ -57,4 +57,13 @@ class Physics(mujoco.Physics):
   """Physics simulation with additional features for the Cheetah domain."""
 
   def speed(self):
-    """Returns the horizontal speed of the Chee
+    """Returns the horizontal speed of the Cheetah."""
+    return self.named.data.sensordata['torso_subtreelinvel'][0]
+
+
+class Cheetah(base.Task):
+  """A `Task` to train a running Cheetah."""
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode."""
+    # The indexing below assumes that all joints have
