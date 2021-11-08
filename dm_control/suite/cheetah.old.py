@@ -66,4 +66,11 @@ class Cheetah(base.Task):
 
   def initialize_episode(self, physics):
     """Sets the state of the environment at the start of each episode."""
-    # The indexing below assumes that all joints have
+    # The indexing below assumes that all joints have a single DOF.
+    assert physics.model.nq == physics.model.njnt
+    is_limited = physics.model.jnt_limited == 1
+    lower, upper = physics.model.jnt_range[is_limited].T
+    physics.data.qpos[is_limited] = self.random.uniform(lower, upper)
+
+    # Stabilize the model before the actual simulation.
+    for _ in range
