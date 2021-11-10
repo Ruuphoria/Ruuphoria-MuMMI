@@ -73,4 +73,14 @@ class Cheetah(base.Task):
     physics.data.qpos[is_limited] = self.random.uniform(lower, upper)
 
     # Stabilize the model before the actual simulation.
-    for _ in range
+    for _ in range(200):
+      physics.step()
+
+    physics.data.time = 0
+    self._timeout_progress = 0
+    super(Cheetah, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation of the state, ignoring horizontal position."""
+    obs = collections.OrderedDict()
+    # I
