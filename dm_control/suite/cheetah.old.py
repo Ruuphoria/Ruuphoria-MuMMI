@@ -83,4 +83,12 @@ class Cheetah(base.Task):
   def get_observation(self, physics):
     """Returns an observation of the state, ignoring horizontal position."""
     obs = collections.OrderedDict()
-    # I
+    # Ignores horizontal position to maintain translational invariance.
+    obs['position'] = physics.data.qpos[1:].copy()
+    obs['velocity'] = physics.velocity()
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a reward to the agent."""
+    return rewards.tolerance(physics.speed(),
+                             bounds=(_RUN_SPEED
