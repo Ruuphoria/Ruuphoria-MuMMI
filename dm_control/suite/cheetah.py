@@ -1,3 +1,4 @@
+
 # Copyright 2017 The dm_control Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import numpy as np
 
 from dm_control import mujoco
 from dm_control.rl import control
@@ -60,6 +62,12 @@ class Physics(mujoco.Physics):
     """Returns the horizontal speed of the Cheetah."""
     return self.named.data.sensordata['torso_subtreelinvel'][0]
 
+  def touchs(self):
+    """Returns the touch signal."""
+    touch1 = self.named.data.sensordata['bfoot_sensor'][0]
+    touch2 = self.named.data.sensordata['ffoot_sensor'][0]
+    return np.array([touch1, touch2])
+
 
 class Cheetah(base.Task):
   """A `Task` to train a running Cheetah."""
@@ -77,21 +85,3 @@ class Cheetah(base.Task):
       physics.step()
 
     physics.data.time = 0
-    self._timeout_progress = 0
-    super(Cheetah, self).initialize_episode(physics)
-
-  def get_observation(self, physics):
-    """Returns an observation of the state, ignoring horizontal position."""
-    obs = collections.OrderedDict()
-    # Ignores horizontal position to maintain translational invariance.
-    obs['position'] = physics.data.qpos[1:].copy()
-    obs['velocity'] = physics.velocity()
-    return obs
-
-  def get_reward(self, physics):
-    """Returns a reward to the agent."""
-    return rewards.tolerance(physics.speed(),
-                             bounds=(_RUN_SPEED, float('inf')),
-                             margin=_RUN_SPEED,
-                             value_at_margin=0,
-                             sigmoid='linear')
