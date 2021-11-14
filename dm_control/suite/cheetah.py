@@ -85,3 +85,23 @@ class Cheetah(base.Task):
       physics.step()
 
     physics.data.time = 0
+    self._timeout_progress = 0
+    super(Cheetah, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation of the state, ignoring horizontal position."""
+    obs = collections.OrderedDict()
+    # Ignores horizontal position to maintain translational invariance.
+    obs['position'] = physics.data.qpos[1:].copy()
+    obs['velocity'] = physics.velocity()
+    obs['touch'] = physics.touchs()
+    obs['n_contact'] = physics.data.ncon
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a reward to the agent."""
+    return rewards.tolerance(physics.speed(),
+                             bounds=(_RUN_SPEED, float('inf')),
+                             margin=_RUN_SPEED,
+                             value_at_margin=0,
+                             sigmoid='linear')
