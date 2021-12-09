@@ -331,3 +331,125 @@ class Stand(base.Task):
                                bounds=(self._stand_height[1], float('inf')),
                                margin=self._stand_height[1])
     # Keep head, torso and pelvis upright.
+    upright = rewards.tolerance(physics.upright(),
+                                bounds=(_MIN_UPRIGHT_COSINE, float('inf')),
+                                sigmoid='linear',
+                                margin=_MIN_UPRIGHT_COSINE+1,
+                                value_at_margin=0)
+
+    # Reward for foot touch forces up to bodyweight.
+    touch = rewards.tolerance(physics.touch_sensors().sum(),
+                              bounds=(self._body_weight, float('inf')),
+                              margin=self._body_weight,
+                              sigmoid='linear',
+                              value_at_margin=0.9)
+
+    return np.hstack((torso, pelvis, upright, touch))
+
+  def get_reward(self, physics):
+    """Returns the reward, product of reward factors."""
+    return np.product(self.get_reward_factors(physics))
+
+
+class Move(Stand):
+  """A dog move task for generating locomotion."""
+
+  def __init__(self, move_speed, random, observe_reward_factors=False):
+    """Initializes an instance of `Move`.
+
+    Args:
+      move_speed: A float. Specifies a target horizontal velocity.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+      observe_reward_factors: Boolean, whether the factorised reward is a
+        component of the observation dict.
+    """
+    self._move_speed = move_speed
+    super(Move, self).__init__(random, observe_reward_factors)
+
+  def get_reward_factors(self, physics):
+    """Returns the factorized reward."""
+    standing = super(Move, self).get_reward_factors(physics)
+
+    speed_margin = max(1.0, self._move_speed)
+    forward = rewards.tolerance(physics.com_forward_velocity(),
+                                bounds=(self._move_speed, 2*self._move_speed),
+                                margin=speed_margin,
+                                value_at_margin=0,
+                                sigmoid='linear')
+    forward = (4*forward + 1) / 5
+
+    return np.hstack((standing, forward))
+
+
+class Fetch(Stand):
+  """A dog fetch task to fetch a thrown ball."""
+
+  def __init__(self, random, observe_reward_factors=False):
+    """Initializes an instance of `Move`.
+
+    Args:
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+      observe_reward_factors: Boolean, whether the factorised reward is a
+        component of the observation dict.
+    """
+    super(Fetch, self).__init__(random, observe_reward_factors)
+
+  def initialize_episode(self, physics):
+    super(Fetch, self).initialize_episode(physics)
+
+    # Set initial ball state: flying towards the center at an upward angle.
+    radius = 0.75 * physics.named.model.geom_size['floor', 0]
+    azimuth = self.random.uniform(0, 2*np.pi)
+    position = (radius*np.sin(azimuth), radius*np.cos(azimuth), 0.05)
+    physics.named.data.qpos['ball_root'][:3] = position
+    vertical_height = self.random.uniform(0, 3)
+    # Equating kinetic and potential energy: mv^2/2 = m*g*h -> v = sqrt(2gh)
+    gravity = -physics.model.opt.gravity[2]
+    vertical_velocity = np.sqrt(2 * gravity * vertical_height)
+    horizontal_speed = self.random.uniform(0, 5)
+    # Pointing towards the center, with some noise.
+    direction = np.array((-np.sin(azimuth) + 0.05*self.random.randn(),
+                          -np.cos(azimuth) + 0.05*self.random.randn()))
+    horizontal_velocity = horizontal_speed * direction
+    velocity = np.hstack((horizontal_velocity, vertical_velocity))
+    physics.named.data.qvel['ball_root'][:3] = velocity
+
+  def get_observation_components(self, physics):
+    """Returns the common observations for the Stand task."""
+    obs = super(Fetch, self).get_observation_components(physics)
+    obs['ball_state'] = physics.ball_in_head_frame()
+    obs['target_position'] = physics.target_in_head_frame()
+    return obs
+
+  def get_reward_factors(self, physics):
+    """Returns a reward to the agent."""
+    standing = super(Fetch, self).get_reward_factors(physics)
+
+    # Reward for bringing mouth close to ball.
+    bite_radius = physics.named.model.site_size['upper_bite', 0]
+    bite_margin = 2
+    reach_ball = rewards.tolerance(physics.ball_to_mouth_distance(),
+                                   bounds=(0, bite_radius),
+                                   sigmoid='reciprocal',
+                                   margin=bite_margin)
+    reach_ball = (6*reach_ball + 1) / 7
+
+    # Reward for bringing the ball close to the target.
+    target_radius = physics.named.model.geom_size['target', 0]
+    bring_margin = physics.named.model.geom_size['floor', 0]
+    ball_near_target = rewards.tolerance(
+        physics.ball_to_target_distance(),
+        bounds=(0, target_radius),
+        sigmoid='reciprocal',
+        margin=bring_margin)
+    fetch_ball = (ball_near_target + 1) / 2
+
+    # Let go of the ball if it's been fetched.
+    if physics.ball_to_target_distance() < 2*target_radius:
+      reach_ball = 1
+
+    return np.hstack((standing, reach_ball, fetch_ball))
