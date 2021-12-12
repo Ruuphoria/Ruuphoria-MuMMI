@@ -860,3 +860,140 @@
     <exclude name="Ca_4:Ca_6" body1="Ca_4" body2="Ca_6"/>
     <exclude name="C_7:scapula_L" body1="C_7" body2="scapula_L"/>
     <exclude name="C_7:scapula_R" body1="C_7" body2="scapula_R"/>
+    <exclude name="C_6:scapula_L" body1="C_6" body2="scapula_L"/>
+    <exclude name="C_6:scapula_R" body1="C_6" body2="scapula_R"/>
+    <exclude name="C_5:scapula_L" body1="C_5" body2="scapula_L"/>
+    <exclude name="C_5:scapula_R" body1="C_5" body2="scapula_R"/>
+    <exclude name="C_1:jaw" body1="C_1" body2="jaw"/>
+    <exclude name="torso:lower_arm_L" body1="torso" body2="lower_arm_L"/>
+    <exclude name="torso:lower_arm_R" body1="torso" body2="lower_arm_R"/>
+    <exclude name="C_4:scapula_R" body1="C_4" body2="scapula_R"/>
+    <exclude name="C_4:scapula_L" body1="C_4" body2="scapula_L"/>
+    <exclude name="C_5:upper_arm_R" body1="C_5" body2="upper_arm_R"/>
+    <exclude name="C_5:upper_arm_L" body1="C_5" body2="upper_arm_L"/>
+    <exclude name="C_6:upper_arm_R" body1="C_6" body2="upper_arm_R"/>
+    <exclude name="C_6:upper_arm_L" body1="C_6" body2="upper_arm_L"/>
+    <exclude name="C_7:upper_arm_R" body1="C_7" body2="upper_arm_R"/>
+    <exclude name="C_7:upper_arm_L" body1="C_7" body2="upper_arm_L"/>
+    <exclude name="upper_leg_L:upper_leg_R" body1="upper_leg_L" body2="upper_leg_R"/>
+    <exclude name="lower_leg_L:pelvis" body1="lower_leg_L" body2="pelvis"/>
+    <exclude name="upper_leg_L:foot_L" body1="upper_leg_L" body2="foot_L"/>
+    <exclude name="lower_leg_R:pelvis" body1="lower_leg_R" body2="pelvis"/>
+    <exclude name="upper_leg_R:foot_R" body1="upper_leg_R" body2="foot_R"/>
+  </contact>
+  <tendon>
+    <fixed name="lumbar_extend" class="lumbar_extend">
+      <joint joint="L_1_extend" coef="1.0887906214976453"/>
+      <joint joint="L_3_extend" coef="1.0287221260745385"/>
+      <joint joint="L_5_extend" coef="0.9678084616051313"/>
+      <joint joint="L_7_extend" coef="0.9146787908226849"/>
+    </fixed>
+    <fixed name="lumbar_bend" class="lumbar_bend">
+      <joint joint="L_1_bend" coef="1.1360135211286146"/>
+      <joint joint="L_3_bend" coef="1.0490053091600777"/>
+      <joint joint="L_5_bend" coef="0.9555458104917836"/>
+      <joint joint="L_7_bend" coef="0.8594353592195243"/>
+    </fixed>
+    <fixed name="lumbar_twist" class="lumbar_twist">
+      <joint joint="L_2_twist" coef="1.0007967860214304"/>
+      <joint joint="L_4_twist" coef="0.9996855391691534"/>
+      <joint joint="L_6_twist" coef="0.9995176748094166"/>
+    </fixed>
+    <fixed name="cervical_extend" class="cervical_extend">
+      <joint joint="C_7_extend" coef="1.1651729548786316"/>
+      <joint joint="C_5_extend" coef="1.0638262565660335"/>
+      <joint joint="C_3_extend" coef="0.9279175112069821"/>
+      <joint joint="C_1_extend" coef="0.8430832773483526"/>
+    </fixed>
+    <fixed name="cervical_bend" class="cervical_bend">
+      <joint joint="C_7_bend" coef="1.1032094508820511"/>
+      <joint joint="C_5_bend" coef="1.1151582521827508"/>
+      <joint joint="C_3_bend" coef="0.9257028175303736"/>
+      <joint joint="C_1_bend" coef="0.8559294794048242"/>
+    </fixed>
+    <fixed name="cervical_twist" class="cervical_twist">
+      <joint joint="C_6_twist" coef="1.0490139787418138"/>
+      <joint joint="C_4_twist" coef="0.9679313738406048"/>
+      <joint joint="C_2_twist" coef="0.9830546474175812"/>
+    </fixed>
+    <fixed name="caudal_extend" class="caudal_extend">
+      <joint joint="Ca_1_extend" coef="1.4175697632800168"/>
+      <joint joint="Ca_3_extend" coef="1.3533291916469086"/>
+      <joint joint="Ca_5_extend" coef="1.2905602895468757"/>
+      <joint joint="Ca_7_extend" coef="1.1963357977448668"/>
+      <joint joint="Ca_9_extend" coef="1.0882282181745322"/>
+      <joint joint="Ca_11_extend" coef="0.9549416058705948"/>
+      <joint joint="Ca_13_extend" coef="0.839068010247595"/>
+      <joint joint="Ca_15_extend" coef="0.7575627896787993"/>
+      <joint joint="Ca_17_extend" coef="0.71516710400689"/>
+      <joint joint="Ca_19_extend" coef="0.6955591082173007"/>
+      <joint joint="Ca_21_extend" coef="0.6916781215856203"/>
+    </fixed>
+    <fixed name="caudal_bend" class="caudal_bend">
+      <joint joint="Ca_2_bend" coef="1.3236846643142188"/>
+      <joint joint="Ca_4_bend" coef="1.3130782401287662"/>
+      <joint joint="Ca_6_bend" coef="1.2679178338493764"/>
+      <joint joint="Ca_8_bend" coef="1.170681278111726"/>
+      <joint joint="Ca_10_bend" coef="1.0404777760545052"/>
+      <joint joint="Ca_12_bend" coef="0.9053320718072471"/>
+      <joint joint="Ca_14_bend" coef="0.8040064645300866"/>
+      <joint joint="Ca_16_bend" coef="0.7475697729484704"/>
+      <joint joint="Ca_18_bend" coef="0.7188107117102569"/>
+      <joint joint="Ca_20_bend" coef="0.7084411865453454"/>
+    </fixed>
+  </tendon>
+  <actuator>
+    <general name="lumbar_extend" class="lumbar_extend" tendon="lumbar_extend"/>
+    <general name="lumbar_bend" class="lumbar_bend" tendon="lumbar_bend"/>
+    <general name="lumbar_twist" class="lumbar_twist" tendon="lumbar_twist"/>
+    <general name="cervical_extend" class="cervical_extend" tendon="cervical_extend"/>
+    <general name="cervical_bend" class="cervical_bend" tendon="cervical_bend"/>
+    <general name="cervical_twist" class="cervical_twist" tendon="cervical_twist"/>
+    <general name="caudal_extend" class="caudal_extend" tendon="caudal_extend"/>
+    <general name="caudal_bend" class="caudal_bend" tendon="caudal_bend"/>
+    <general name="hip_L_supinate" class="hip_supinate" joint="hip_L_supinate"/>
+    <general name="hip_L_abduct" class="hip_abduct" joint="hip_L_abduct"/>
+    <general name="hip_L_extend" class="hip_extend" joint="hip_L_extend"/>
+    <general name="knee_L" class="knee" joint="knee_L"/>
+    <general name="ankle_L" class="ankle" joint="ankle_L"/>
+    <general name="toe_L" class="toe" joint="toe_L"/>
+    <general name="hip_R_supinate" class="hip_supinate" joint="hip_R_supinate"/>
+    <general name="hip_R_abduct" class="hip_abduct" joint="hip_R_abduct"/>
+    <general name="hip_R_extend" class="hip_extend" joint="hip_R_extend"/>
+    <general name="knee_R" class="knee" joint="knee_R"/>
+    <general name="ankle_R" class="ankle" joint="ankle_R"/>
+    <general name="toe_R" class="toe" joint="toe_R"/>
+    <general name="atlas" class="atlas" joint="atlas"/>
+    <general name="mandible" class="mandible" joint="mandible"/>
+    <general name="scapula_L_supinate" class="scapula_supinate" joint="scapula_L_supinate"/>
+    <general name="scapula_L_abduct" class="scapula_abduct" joint="scapula_L_abduct"/>
+    <general name="scapula_L_extend" class="scapula_extend" joint="scapula_L_extend"/>
+    <general name="shoulder_L_supinate" class="shoulder_supinate" joint="shoulder_L_supinate"/>
+    <general name="shoulder_L_extend" class="shoulder_extend" joint="shoulder_L_extend"/>
+    <general name="elbow_L" class="elbow" joint="elbow_L"/>
+    <general name="wrist_L" class="wrist" joint="wrist_L"/>
+    <general name="finger_L" class="finger" joint="finger_L"/>
+    <general name="scapula_R_supinate" class="scapula_supinate" joint="scapula_R_supinate"/>
+    <general name="scapula_R_abduct" class="scapula_abduct" joint="scapula_R_abduct"/>
+    <general name="scapula_R_extend" class="scapula_extend" joint="scapula_R_extend"/>
+    <general name="shoulder_R_supinate" class="shoulder_supinate" joint="shoulder_R_supinate"/>
+    <general name="shoulder_R_extend" class="shoulder_extend" joint="shoulder_R_extend"/>
+    <general name="elbow_R" class="elbow" joint="elbow_R"/>
+    <general name="wrist_R" class="wrist" joint="wrist_R"/>
+    <general name="finger_R" class="finger" joint="finger_R"/>
+  </actuator>
+  <sensor>
+    <accelerometer name="accelerometer" site="head"/>
+    <velocimeter name="velocimeter" site="head"/>
+    <gyro name="gyro" site="head"/>
+    <subtreelinvel name="torso_linvel" body="torso"/>
+    <touch name="palm_L" site="palm_L"/>
+    <touch name="palm_R" site="palm_R"/>
+    <touch name="sole_L" site="sole_L"/>
+    <touch name="sole_R" site="sole_R"/>
+    <force name="foot_L" site="foot_anchor_L"/>
+    <force name="foot_R" site="foot_anchor_R"/>
+    <force name="hand_L" site="hand_anchor_L"/>
+    <force name="hand_R" site="hand_anchor_R"/>
+  </sensor>
+</mujoco>
