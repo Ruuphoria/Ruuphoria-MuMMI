@@ -35,4 +35,9 @@ flags.DEFINE_enum('environment_name', None, _ALL_NAMES,
                   'select one.')
 flags.DEFINE_bool('timeout', True, 'Whether episodes should have a time limit.')
 flags.DEFINE_bool('visualize_reward', True,
-          
+                  'Whether to vary the colors of geoms according to the '
+                  'current reward value.')
+flags.DEFINE_float('action_noise', 0.,
+                   'Standard deviation of Gaussian noise to apply to actions, '
+                   'expressed as a fraction of the max-min range for each '
+                   'action dimension. Defaults to 0, i.e. n
