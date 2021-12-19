@@ -30,4 +30,9 @@ from dm_control import viewer
 _ALL_NAMES = ['.'.join(domain_task) for domain_task in suite.ALL_TASKS]
 
 flags.DEFINE_enum('environment_name', None, _ALL_NAMES,
-                
+                  'Optional \'domain_name.task_name\' pair specifying the '
+                  'environment to load. If unspecified a prompt will appear to '
+                  'select one.')
+flags.DEFINE_bool('timeout', True, 'Whether episodes should have a time limit.')
+flags.DEFINE_bool('visualize_reward', True,
+          
