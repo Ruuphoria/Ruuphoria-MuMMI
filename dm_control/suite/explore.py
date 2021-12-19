@@ -18,4 +18,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from absl i
+from absl import app
+from absl import flags
+from dm_control import suite
+from dm_control.suite.wrappers import action_noise
+from six.moves import input
+
+from dm_control import viewer
+
+
+_ALL_NAMES = ['.'.join(domain_task) for domain_task in suite.ALL_TASKS]
+
+flags.DEFINE_enum('environment_name', None, _ALL_NAMES,
+                
