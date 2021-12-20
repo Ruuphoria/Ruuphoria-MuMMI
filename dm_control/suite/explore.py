@@ -40,4 +40,13 @@ flags.DEFINE_bool('visualize_reward', True,
 flags.DEFINE_float('action_noise', 0.,
                    'Standard deviation of Gaussian noise to apply to actions, '
                    'expressed as a fraction of the max-min range for each '
-                   'action dimension. Defaults to 0, i.e. n
+                   'action dimension. Defaults to 0, i.e. no noise.')
+FLAGS = flags.FLAGS
+
+
+def prompt_environment_name(prompt, values):
+  environment_name = None
+  while not environment_name:
+    environment_name = input(prompt)
+    if not environment_name or values.index(environment_name) < 0:
+      print('"%s" is not a valid environment name.' % environme
