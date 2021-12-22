@@ -49,4 +49,15 @@ def prompt_environment_name(prompt, values):
   while not environment_name:
     environment_name = input(prompt)
     if not environment_name or values.index(environment_name) < 0:
-      print('"%s" is not a valid environment name.' % environme
+      print('"%s" is not a valid environment name.' % environment_name)
+      environment_name = None
+  return environment_name
+
+
+def main(argv):
+  del argv
+  environment_name = FLAGS.environment_name
+  if environment_name is None:
+    print('\n  '.join(['Available environments:'] + _ALL_NAMES))
+    environment_name = prompt_environment_name(
+        'Please select an en
