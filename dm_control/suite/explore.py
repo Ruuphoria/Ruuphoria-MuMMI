@@ -60,4 +60,15 @@ def main(argv):
   if environment_name is None:
     print('\n  '.join(['Available environments:'] + _ALL_NAMES))
     environment_name = prompt_environment_name(
-        'Please select an en
+        'Please select an environment name: ', _ALL_NAMES)
+
+  index = _ALL_NAMES.index(environment_name)
+  domain_name, task_name = suite.ALL_TASKS[index]
+
+  task_kwargs = {}
+  if not FLAGS.timeout:
+    task_kwargs['time_limit'] = float('inf')
+
+  def loader():
+    env = suite.load(
+        domain_name=domain_name, task_name=task_name, task_kw
