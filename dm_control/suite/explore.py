@@ -71,4 +71,14 @@ def main(argv):
 
   def loader():
     env = suite.load(
-        domain_name=domain_name, task_name=task_name, task_kw
+        domain_name=domain_name, task_name=task_name, task_kwargs=task_kwargs)
+    env.task.visualize_reward = FLAGS.visualize_reward
+    if FLAGS.action_noise > 0:
+      env = action_noise.Wrapper(env, scale=FLAGS.action_noise)
+    return env
+
+  viewer.launch(loader)
+
+
+if __name__ == '__main__':
+  app.run(main)
