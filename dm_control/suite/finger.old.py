@@ -27,4 +27,14 @@ from dm_control.suite import base
 from dm_control.suite import common
 from dm_control.suite.utils import randomizers
 from dm_control.utils import containers
-import numpy as
+import numpy as np
+from six.moves import range
+
+_DEFAULT_TIME_LIMIT = 20  # (seconds)
+_CONTROL_TIMESTEP = .02   # (seconds)
+# For TURN tasks, the 'tip' geom needs to enter a spherical target of sizes:
+_EASY_TARGET_SIZE = 0.07
+_HARD_TARGET_SIZE = 0.03
+# Initial spin velocity for the Stop task.
+_INITIAL_SPIN_VELOCITY = 100
+# Spinning slower than this value (radian/
