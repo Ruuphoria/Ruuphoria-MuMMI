@@ -66,4 +66,9 @@ def spin(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
 def turn_easy(time_limit=_DEFAULT_TIME_LIMIT, random=None,
               environment_kwargs=None):
   """Returns the easy Turn task."""
-  ph
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = Turn(target_radius=_EASY_TARGET_SIZE, random=random)
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP,
+      **environment_kwargs)
