@@ -56,4 +56,14 @@ def spin(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
   """Returns the Spin task."""
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = Spin(random=random)
-  environment_kwargs = environ
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP,
+      **environment_kwargs)
+
+
+@SUITE.add('benchmarking')
+def turn_easy(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+              environment_kwargs=None):
+  """Returns the easy Turn task."""
+  ph
