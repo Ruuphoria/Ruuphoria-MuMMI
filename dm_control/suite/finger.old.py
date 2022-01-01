@@ -81,4 +81,13 @@ def turn_hard(time_limit=_DEFAULT_TIME_LIMIT, random=None,
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = Turn(target_radius=_HARD_TARGET_SIZE, random=random)
   environment_kwargs = environment_kwargs or {}
-  return control.En
+  return control.Environment(
+      physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP,
+      **environment_kwargs)
+
+
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the Finger domain."""
+
+  def touch(self):
+    """Returns logarithmically scaled signals from the 
