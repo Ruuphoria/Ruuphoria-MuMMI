@@ -90,4 +90,12 @@ class Physics(mujoco.Physics):
   """Physics simulation with additional features for the Finger domain."""
 
   def touch(self):
-    """Returns logarithmically scaled signals from the 
+    """Returns logarithmically scaled signals from the two touch sensors."""
+    return np.log1p(self.named.data.sensordata[['touchtop', 'touchbottom']])
+
+  def hinge_velocity(self):
+    """Returns the velocity of the hinge joint."""
+    return self.named.data.sensordata['hinge_velocity']
+
+  def tip_position(self):
+    """Returns the (x,z) pos
