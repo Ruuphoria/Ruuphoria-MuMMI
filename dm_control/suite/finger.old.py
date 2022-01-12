@@ -129,4 +129,12 @@ class Physics(mujoco.Physics):
 
 
 class Spin(base.Task):
-  """A Finger `Task` to 
+  """A Finger `Task` to spin the stopped body."""
+
+  def __init__(self, random=None):
+    """Initializes a new `Spin` instance.
+
+    Args:
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default)
