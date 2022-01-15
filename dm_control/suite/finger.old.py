@@ -146,4 +146,14 @@ class Spin(base.Task):
     physics.named.model.site_rgba['tip', 3] = 0
     physics.named.model.dof_damping['hinge'] = .03
     _set_random_joint_angles(physics, self.random)
-    super(Spin, self).initialize_ep
+    super(Spin, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns state and touch sensors, and target info."""
+    obs = collections.OrderedDict()
+    obs['position'] = physics.bounded_position()
+    obs['velocity'] = physics.velocity()
+    obs['touch'] = physics.touch()
+    return obs
+
+  def get_rew
