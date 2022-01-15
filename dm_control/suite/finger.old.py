@@ -137,4 +137,13 @@ class Spin(base.Task):
     Args:
       random: Optional, either a `numpy.random.RandomState` instance, an
         integer seed for creating a new `RandomState`, or None to select a seed
-        automatically (default)
+        automatically (default).
+    """
+    super(Spin, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    physics.named.model.site_rgba['target', 3] = 0
+    physics.named.model.site_rgba['tip', 3] = 0
+    physics.named.model.dof_damping['hinge'] = .03
+    _set_random_joint_angles(physics, self.random)
+    super(Spin, self).initialize_ep
