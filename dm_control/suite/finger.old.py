@@ -165,4 +165,12 @@ class Turn(base.Task):
   """A Finger `Task` to turn the body to a target angle."""
 
   def __init__(self, target_radius, random=None):
-    """Initializes a new `Turn` 
+    """Initializes a new `Turn` instance.
+
+    Args:
+      target_radius: Radius of the target site, which specifies the goal angle.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    self._target_radius = target_radius
