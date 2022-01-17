@@ -174,3 +174,10 @@ class Turn(base.Task):
         automatically (default).
     """
     self._target_radius = target_radius
+    super(Turn, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    target_angle = self.random.uniform(-np.pi, np.pi)
+    hinge_x, hinge_z = physics.named.data.xanchor['hinge', ['x', 'z']]
+    radius = physics.named.model.geom_size['cap1'].sum()
+    target_x = hinge_x + radius
