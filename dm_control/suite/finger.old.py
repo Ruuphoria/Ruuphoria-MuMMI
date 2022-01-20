@@ -180,4 +180,13 @@ class Turn(base.Task):
     target_angle = self.random.uniform(-np.pi, np.pi)
     hinge_x, hinge_z = physics.named.data.xanchor['hinge', ['x', 'z']]
     radius = physics.named.model.geom_size['cap1'].sum()
-    target_x = hinge_x + radius
+    target_x = hinge_x + radius * np.sin(target_angle)
+    target_z = hinge_z + radius * np.cos(target_angle)
+    physics.named.model.site_pos['target', ['x', 'z']] = target_x, target_z
+    physics.named.model.site_size['target', 0] = self._target_radius
+
+    _set_random_joint_angles(physics, self.random)
+
+    super(Turn, self).initialize_episode(physics)
+
+ 
