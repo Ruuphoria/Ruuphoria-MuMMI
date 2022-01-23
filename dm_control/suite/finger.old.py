@@ -189,4 +189,11 @@ class Turn(base.Task):
 
     super(Turn, self).initialize_episode(physics)
 
- 
+  def get_observation(self, physics):
+    """Returns state, touch sensors, and target info."""
+    obs = collections.OrderedDict()
+    obs['position'] = physics.bounded_position()
+    obs['velocity'] = physics.velocity()
+    obs['touch'] = physics.touch()
+    obs['target_position'] = physics.target_position()
+    obs['dist_to_target'] = physics
