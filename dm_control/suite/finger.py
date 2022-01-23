@@ -34,4 +34,16 @@ _DEFAULT_TIME_LIMIT = 20  # (seconds)
 _CONTROL_TIMESTEP = .02   # (seconds)
 # For TURN tasks, the 'tip' geom needs to enter a spherical target of sizes:
 _EASY_TARGET_SIZE = 0.07
-_HARD_TARGE
+_HARD_TARGET_SIZE = 0.03
+# Initial spin velocity for the Stop task.
+_INITIAL_SPIN_VELOCITY = 100
+# Spinning slower than this value (radian/second) is considered stopped.
+_STOP_VELOCITY = 1e-6
+# Spinning faster than this value (radian/second) is considered spinning.
+_SPIN_VELOCITY = 15.0
+
+
+SUITE = containers.TaggedTasks()
+
+
+def get_mod
