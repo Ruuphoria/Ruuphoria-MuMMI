@@ -196,4 +196,15 @@ class Turn(base.Task):
     obs['velocity'] = physics.velocity()
     obs['touch'] = physics.touch()
     obs['target_position'] = physics.target_position()
-    obs['dist_to_target'] = physics
+    obs['dist_to_target'] = physics.dist_to_target()
+    return obs
+
+  def get_reward(self, physics):
+    return float(physics.dist_to_target() <= 0)
+
+
+def _set_random_joint_angles(physics, random, max_attempts=1000):
+  """Sets the joints to a random collision-free state."""
+
+  for _ in range(max_attempts):
+    randomizers.randomize_limit
