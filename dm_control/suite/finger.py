@@ -46,4 +46,12 @@ _SPIN_VELOCITY = 15.0
 SUITE = containers.TaggedTasks()
 
 
-def get_mod
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('finger.xml'), common.ASSETS
+
+
+@SUITE.add('benchmarking')
+def spin(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
+  """Returns the Spin task."""
+  physics = Physics.from_xml_s
