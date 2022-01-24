@@ -70,4 +70,13 @@ def turn_easy(time_limit=_DEFAULT_TIME_LIMIT, random=None,
   task = Turn(target_radius=_EASY_TARGET_SIZE, random=random)
   environment_kwargs = environment_kwargs or {}
   return control.Environment(
-      physics, task, time_
+      physics, task, time_limit=time_limit, control_timestep=_CONTROL_TIMESTEP,
+      **environment_kwargs)
+
+
+@SUITE.add('benchmarking')
+def turn_hard(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+              environment_kwargs=None):
+  """Returns the hard Turn task."""
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = Turn(tar
