@@ -87,4 +87,12 @@ def turn_hard(time_limit=_DEFAULT_TIME_LIMIT, random=None,
 
 
 class Physics(mujoco.Physics):
-  """Physics simulation with additional features for the Finger domai
+  """Physics simulation with additional features for the Finger domain."""
+
+  def touch(self):
+    """Returns logarithmically scaled signals from the two touch sensors."""
+    return np.log1p(self.named.data.sensordata[['touchtop', 'touchbottom']])
+
+  def hinge_velocity(self):
+    """Returns the velocity of the hinge joint."""
+    return self.named.data.sensordata['hing
