@@ -110,4 +110,13 @@ class Physics(mujoco.Physics):
   def velocity(self):
     """Returns the velocities (extracted from sensordata)."""
     return self.named.data.sensordata[['proximal_velocity',
-                        
+                                       'distal_velocity',
+                                       'hinge_velocity']]
+
+  def target_position(self):
+    """Returns the (x,z) position of the target relative to the hinge."""
+    return (self.named.data.sensordata['target'][[0, 2]] -
+            self.named.data.sensordata['spinner'][[0, 2]])
+
+  def to_target(self):
+   
