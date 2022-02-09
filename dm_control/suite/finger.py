@@ -119,4 +119,13 @@ class Physics(mujoco.Physics):
             self.named.data.sensordata['spinner'][[0, 2]])
 
   def to_target(self):
-   
+    """Returns the vector from the tip to the target."""
+    return self.target_position() - self.tip_position()
+
+  def dist_to_target(self):
+    """Returns the signed distance to the target surface, negative is inside."""
+    return (np.linalg.norm(self.to_target()) -
+            self.named.model.site_size['target', 0])
+
+
+class Spin(base.Task):
