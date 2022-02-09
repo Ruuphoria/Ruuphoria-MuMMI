@@ -103,4 +103,11 @@ class Physics(mujoco.Physics):
             self.named.data.sensordata['spinner'][[0, 2]])
 
   def bounded_position(self):
-    """Returns the positions, wit
+    """Returns the positions, with the hinge angle replaced by tip position."""
+    return np.hstack((self.named.data.sensordata[['proximal', 'distal']],
+                      self.tip_position()))
+
+  def velocity(self):
+    """Returns the velocities (extracted from sensordata)."""
+    return self.named.data.sensordata[['proximal_velocity',
+                        
