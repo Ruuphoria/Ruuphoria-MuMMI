@@ -153,4 +153,16 @@ class Spin(base.Task):
     obs = collections.OrderedDict()
     obs['position'] = physics.bounded_position()
     obs['velocity'] = physics.velocity()
-    obs
+    obs['touch'] = physics.touch()
+    obs['n_contact'] = physics.data.ncon
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a sparse reward."""
+    return float(physics.hinge_velocity() <= -_SPIN_VELOCITY)
+
+
+class Turn(base.Task):
+  """A Finger `Task` to turn the body to a target angle."""
+
+  def __init__(self, target
