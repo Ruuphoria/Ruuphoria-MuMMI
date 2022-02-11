@@ -171,4 +171,12 @@ class Turn(base.Task):
     Args:
       target_radius: Radius of the target site, which specifies the goal angle.
       random: Optional, either a `numpy.random.RandomState` instance, an
-        integer seed for creating a new `RandomState`, or None to select a 
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    self._target_radius = target_radius
+    super(Turn, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    target_angle = self.random.uniform(-np.pi, np.pi)
+    hinge_x, hinge_z = physics.named.data.xanchor['hinge', ['x', '
