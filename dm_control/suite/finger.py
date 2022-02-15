@@ -186,4 +186,12 @@ class Turn(base.Task):
     physics.named.model.site_pos['target', ['x', 'z']] = target_x, target_z
     physics.named.model.site_size['target', 0] = self._target_radius
 
-    _set_
+    _set_random_joint_angles(physics, self.random)
+
+    super(Turn, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns state, touch sensors, and target info."""
+    obs = collections.OrderedDict()
+    obs['position'] = physics.bounded_position()
+    obs['velocity'] = phys
