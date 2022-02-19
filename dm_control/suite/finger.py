@@ -194,4 +194,15 @@ class Turn(base.Task):
     """Returns state, touch sensors, and target info."""
     obs = collections.OrderedDict()
     obs['position'] = physics.bounded_position()
-    obs['velocity'] = phys
+    obs['velocity'] = physics.velocity()
+    obs['touch'] = physics.touch()
+    obs['target_position'] = physics.target_position()
+    obs['dist_to_target'] = physics.dist_to_target()
+    return obs
+
+  def get_reward(self, physics):
+    return float(physics.dist_to_target() <= 0)
+
+
+def _set_random_joint_angles(physics, random, max_attempts=1000):
+  "
