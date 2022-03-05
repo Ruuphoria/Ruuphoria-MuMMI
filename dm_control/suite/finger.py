@@ -205,4 +205,14 @@ class Turn(base.Task):
 
 
 def _set_random_joint_angles(physics, random, max_attempts=1000):
-  "
+  """Sets the joints to a random collision-free state."""
+
+  for _ in range(max_attempts):
+    randomizers.randomize_limited_and_rotational_joints(physics, random)
+    # Check for collisions.
+    physics.after_reset()
+    if physics.data.ncon == 0:
+      break
+  else:
+    raise RuntimeError('Could not find a collision-free state '
+                    
