@@ -3,4 +3,14 @@
   <include file="./common/skybox.xml"/>
   <include file="./common/materials.xml"/>
 
-  <option timestep="0.01" cone=
+  <option timestep="0.01" cone="elliptic" iterations="200">
+    <flag gravity="disable"/>
+  </option>
+
+  <default>
+    <geom solimp="0 0.9 0.01" solref=".02 1"/>
+    <joint type="hinge" axis="0 -1 0"/>
+    <motor ctrllimited="true" ctrlrange="-1 1"/>
+    <default class="finger">
+      <joint damping="2.5" limited="true"/>
+      <site type="ellipso
