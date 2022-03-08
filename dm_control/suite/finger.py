@@ -215,4 +215,4 @@ def _set_random_joint_angles(physics, random, max_attempts=1000):
       break
   else:
     raise RuntimeError('Could not find a collision-free state '
-                    
+                       'after {} attempts'.format(max_attempts))
