@@ -13,4 +13,12 @@
     <motor ctrllimited="true" ctrlrange="-1 1"/>
     <default class="finger">
       <joint damping="2.5" limited="true"/>
-      <site type="ellipso
+      <site type="ellipsoid" size=".025 .03 .025" material="site" group="3"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="light" directional="true" diffuse=".6 .6 .6" pos="0 0 2" specular=".3 .3 .3"/>
+    <geom name="ground" type="plane" pos="0 0 0" size=".6 .2 10" material="grid"/>
+    <camera name="cam0" pos="0 -1 .8" xyaxes="1 0 0 0 1 2"/>
+    <camera 
