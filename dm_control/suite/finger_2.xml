@@ -26,4 +26,8 @@
     <body name="proximal" pos="-.2 0 .4" childclass="finger">
       <geom name="proximal_decoration" type="cylinder" fromto="0 -.033 0 0 .033 0" size=".034" material="decoration"/>
       <joint name="proximal" range="-110 110" ref="-90"/>
-      <geom name="proximal" type="caps
+      <geom name="proximal" type="capsule" material="self" size=".03" fromto="0 0 0 0 0 -.17"/>
+      <body name="distal" pos="0 0 -.28" childclass="finger">
+        <joint name="distal" range="-110 110"/>
+        <geom name="distal" type="capsule" size=".028" material="self" fromto="0 0 0 0 0 -.16" contype="0" conaffinity="0"/>
+        <geom name="fingertip
