@@ -38,4 +38,7 @@
 
     <body name="spinner" pos=".2 0 .4">
       <joint name="hinge" frictionloss=".1" damping=".5"/>
-      <geom name="cap1" ty
+      <geom name="cap1" type="capsule" size=".04 .09" material="self" pos=".02 0 0"/>
+      <geom name="cap2" type="capsule" size=".04 .09" material="self" pos="-.02 0 0"/>
+      <site name="tip" type="sphere"  size=".02" pos="0 0 .13" material="target"/>
+      <geom name="spinner_decoration" type="cylinder" fromto="0 -.045 0 0 .045 0" size=".02" material=
