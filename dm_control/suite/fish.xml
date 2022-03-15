@@ -1,0 +1,2 @@
+<mujoco model="fish">
+  <include file="./common/vi

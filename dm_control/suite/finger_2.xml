@@ -52,4 +52,10 @@
     <motor name="distal" joint="distal" gear="15"/>
   </actuator>
 
-  <!-- All finger observations are functions of sensors. This is useful for finit
+  <!-- All finger observations are functions of sensors. This is useful for finite-differencing. -->
+  <sensor>
+    <touch name="touchtop" site="touchtop"/>
+  </sensor>
+
+</mujoco>
+
