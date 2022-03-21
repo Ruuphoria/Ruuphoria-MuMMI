@@ -19,4 +19,7 @@
   </default>
 
   <worldbody>
-    <camera name="t
+    <camera name="tracking_top" pos="0 0 1" xyaxes="1 0 0 0 1 0" mode="trackcom"/>
+    <camera name="tracking_x" pos="-.3 0 .2" xyaxes="0 -1 0 0.342 0 0.940" fovy="60" mode="trackcom"/>
+    <camera name="tracking_y" pos="0 -.3 .2" xyaxes="1 0 0 0 0.342 0.940" fovy="60" mode="trackcom"/>
+    <camera name="fixed_top" pos="0 0 5.5" fovy="10"
