@@ -7,4 +7,16 @@
 
 
   <option timestep="0.004" density="5000">
-    <flag gravity="disable" constrai
+    <flag gravity="disable" constraint="disable"/>
+  </option>
+
+  <default>
+    <general ctrllimited="true"/>
+    <default class="fish">
+      <joint type="hinge" limited="false" range="-60 60" damping="2e-5" solreflimit=".1 1" solimplimit="0 .8 .1"/>
+      <geom material="self"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <camera name="t
