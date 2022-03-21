@@ -1,2 +1,10 @@
 <mujoco model="fish">
-  <include file="./common/vi
+  <include file="./common/visual.xml"/>
+  <include file="./common/materials.xml"/>
+  <asset>
+      <texture name="skybox" type="skybox" builtin="gradient" rgb1=".4 .6 .8" rgb2="0 0 0" width="800" height="800" mark="random" markrgb="1 1 1"/>
+  </asset>
+
+
+  <option timestep="0.004" density="5000">
+    <flag gravity="disable" constrai
