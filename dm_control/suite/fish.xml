@@ -38,4 +38,10 @@
       <geom name="torso_massive" type="box" size=".002 .06 .03" group="4"/>
       <body name="tail1" pos="0 -.09 0">
         <joint name="tail1" axis="0 0 1" pos="0 .01 0"/>
-        <joint name="tail_twist"
+        <joint name="tail_twist" axis="0 1 0" pos="0 .01 0" range="-30 30"/>
+        <geom name="tail1" type="ellipsoid" size=".001 .008 .016"/>
+        <body name="tail2" pos="0 -.028 0">
+          <joint name="tail2" axis="0 0 1" pos="0 .02 0" stiffness="8e-5"/>
+          <geom name="tail2" type="ellipsoid" size=".001 .018 .035"/>
+        </body>
+      </body>
