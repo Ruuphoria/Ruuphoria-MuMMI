@@ -26,4 +26,9 @@
     <geom name="ground" type="plane" size=".5 .5 .1" material="grid"/>
     <geom name="target" type="sphere" pos="0 .4 .1" size=".04" material="target"/>
     <body name="torso" pos="0 0 .1" childclass="fish">
-      <light name="light" diffuse=".6 .6 .6" pos="0 0 0.5" dir="0 0 -1" specular=".3 .3 .3" mod
+      <light name="light" diffuse=".6 .6 .6" pos="0 0 0.5" dir="0 0 -1" specular=".3 .3 .3" mode="track"/>
+      <joint name="root" type="free" damping="0" limited="false"/>
+      <site name="torso" size=".01" rgba="0 0 0 0"/>
+      <geom name="eye" type="ellipsoid" pos="0 .055 .015" size=".008 .012 .008" euler="-10 0 0" material="eye" mass="0"/>
+      <camera name="eye" pos="0 .06 .02" xyaxes="1 0 0 0 0 1"/>
+      <geom name="mou
