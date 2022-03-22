@@ -34,4 +34,8 @@
       <geom name="mouth" type="capsule" fromto="0 .079 0 0 .07 0" size=".005" material="effector" mass="0"/>
       <geom name="lower_mouth" type="capsule" fromto="0 .079 -.004 0 .07 -.003" size=".0045" material="effector" mass="0"/>
       <geom name="torso" type="ellipsoid" size=".01 .08 .04" mass="0"/>
-      <geom name="back_
+      <geom name="back_fin" type="ellipsoid" size=".001 .03 .015" pos="0 -.03 .03" material="effector" mass="0"/>
+      <geom name="torso_massive" type="box" size=".002 .06 .03" group="4"/>
+      <body name="tail1" pos="0 -.09 0">
+        <joint name="tail1" axis="0 0 1" pos="0 .01 0"/>
+        <joint name="tail_twist"
