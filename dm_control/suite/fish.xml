@@ -31,4 +31,7 @@
       <site name="torso" size=".01" rgba="0 0 0 0"/>
       <geom name="eye" type="ellipsoid" pos="0 .055 .015" size=".008 .012 .008" euler="-10 0 0" material="eye" mass="0"/>
       <camera name="eye" pos="0 .06 .02" xyaxes="1 0 0 0 0 1"/>
-      <geom name="mou
+      <geom name="mouth" type="capsule" fromto="0 .079 0 0 .07 0" size=".005" material="effector" mass="0"/>
+      <geom name="lower_mouth" type="capsule" fromto="0 .079 -.004 0 .07 -.003" size=".0045" material="effector" mass="0"/>
+      <geom name="torso" type="ellipsoid" size=".01 .08 .04" mass="0"/>
+      <geom name="back_
