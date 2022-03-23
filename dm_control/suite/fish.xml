@@ -45,3 +45,10 @@
           <geom name="tail2" type="ellipsoid" size=".001 .018 .035"/>
         </body>
       </body>
+      <body name="finright" pos=".01 0 0">
+        <joint name="finright_roll" axis="0 1 0"/>
+        <joint name="finright_pitch" axis="1 0 0" pos="0 .005 0"/>
+        <geom name="finright" type="ellipsoid" pos=".015 0 0" size=".02 .015 .001"  />
+      </body>
+      <body name="finleft" pos="-.01 0 0">
+    
