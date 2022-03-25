@@ -61,4 +61,13 @@
   <tendon>
     <fixed name="fins_flap">
       <joint joint="finleft_roll"  coef="-.5"/>
-      <joint joint="
+      <joint joint="finright_roll" coef=".5"/>
+    </fixed>
+    <fixed name="fins_sym" stiffness="1e-4">
+      <joint joint="finleft_roll"  coef=".5"/>
+      <joint joint="finright_roll" coef=".5"/>
+    </fixed>
+  </tendon>
+
+  <actuator>
+    <position name="tail"           joint="tail1"           ctrlrange="-1 1"  
