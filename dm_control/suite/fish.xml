@@ -70,4 +70,8 @@
   </tendon>
 
   <actuator>
-    <position name="tail"           joint="tail1"           ctrlrange="-1 1"  
+    <position name="tail"           joint="tail1"           ctrlrange="-1 1"    kp="5e-4"/>
+    <position name="tail_twist"     joint="tail_twist"      ctrlrange="-1 1"    kp="1e-4"/>
+    <position name="fins_flap"      tendon="fins_flap"      ctrlrange="-1 1"    kp="3e-4"/>
+    <position name="finleft_pitch"  joint="finleft_pitch"   ctrlrange="-1 1"    kp="1e-4"/>
+    <position name="finright_pitch" joi
