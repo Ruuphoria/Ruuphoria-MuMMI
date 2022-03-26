@@ -19,3 +19,8 @@
 
   <option timestep="0.005"/>
 
+  <worldbody>
+    <camera name="cam0" pos="0 -2.8 0.8" euler="90 0 0" mode="trackcom"/>
+    <camera name="back" pos="-2 -.2 1.2" xyaxes="0.2 -1 0 .5 0 2" mode="trackcom"/>
+    <geom name="floor" type="plane" conaffinity="1" pos="48 0 0" size="50 1 .2" material="grid"/>
+    <body name="torso" po
