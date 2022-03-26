@@ -7,4 +7,15 @@
 
   <default>
     <default class="hopper">
-      <joint type="hinge" axis="0 1 0" limited="t
+      <joint type="hinge" axis="0 1 0" limited="true" damping=".05" armature=".2"/>
+      <geom type="capsule" material="self"/>
+      <site type="sphere" size="0.05" group="3"/>
+    </default>
+    <default class="free">
+      <joint limited="false" damping="0" armature="0" stiffness="0"/>
+    </default>
+    <motor ctrlrange="-1 1" ctrllimited="true"/>
+  </default>
+
+  <option timestep="0.005"/>
+
