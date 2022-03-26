@@ -74,4 +74,12 @@
     <position name="tail_twist"     joint="tail_twist"      ctrlrange="-1 1"    kp="1e-4"/>
     <position name="fins_flap"      tendon="fins_flap"      ctrlrange="-1 1"    kp="3e-4"/>
     <position name="finleft_pitch"  joint="finleft_pitch"   ctrlrange="-1 1"    kp="1e-4"/>
-    <position name="finright_pitch" joi
+    <position name="finright_pitch" joint="finright_pitch"  ctrlrange="-1 1"    kp="1e-4"/>
+  </actuator>
+
+  <sensor>
+    <velocimeter name="velocimeter" site="torso"/>
+    <gyro name="gyro" site="torso"/>
+  </sensor>
+</mujoco>
+
