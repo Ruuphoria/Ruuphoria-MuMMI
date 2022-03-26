@@ -44,4 +44,18 @@
               <geom name="foot" fromto="-.08 0 0 .17 0 0" size="0.04"/>
               <site name="touch_toe" pos=".17 0 0"/>
               <site name="touch_heel" pos="-.08 0 0"/>
-           
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <subtreelinvel name="torso_subtreelinvel" body="torso"/>
+    <touch name="touch_toe" site="touch_toe"/>
+    <touch name="touch_heel" site="touch_heel"/>
+  </sensor>
+
+  <actuator>
+    <motor name="waist" j
