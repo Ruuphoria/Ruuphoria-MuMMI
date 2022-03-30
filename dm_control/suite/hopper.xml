@@ -58,4 +58,9 @@
   </sensor>
 
   <actuator>
-    <motor name="waist" j
+    <motor name="waist" joint="waist" gear="30"/>
+    <motor name="hip" joint="hip" gear="40"/>
+    <motor name="knee" joint="knee" gear="30"/>
+    <motor name="ankle" joint="ankle" gear="10"/>
+  </actuator>
+</mujoco>
