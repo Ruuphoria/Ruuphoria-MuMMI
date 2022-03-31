@@ -206,3 +206,85 @@
           </body>
         </body>
       </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <exclude body1="lclavicle" body2="rclavicle"/>
+    <exclude body1="lowerneck" body2="lclavicle"/>
+    <exclude body1="lowerneck" body2="rclavicle"/>
+    <exclude body1="upperneck" body2="lclavicle"/>
+    <exclude body1="upperneck" body2="rclavicle"/>
+  </contact>
+
+  <actuator>
+    <motor name="headrx" joint="headrx" gear="20"/>
+    <motor name="headry" joint="headry" gear="20"/>
+    <motor name="headrz" joint="headrz" gear="20"/>
+    <motor name="lclaviclery" joint="lclaviclery" gear="20"/>
+    <motor name="lclaviclerz" joint="lclaviclerz" gear="20"/>
+    <motor name="lfemurrx" joint="lfemurrx" gear="120"/>
+    <motor name="lfemurry" joint="lfemurry" gear="40"/>
+    <motor name="lfemurrz" joint="lfemurrz" gear="40"/>
+    <motor name="lfingersrx" joint="lfingersrx" gear="20"/>
+    <motor name="lfootrx" joint="lfootrx" gear="20"/>
+    <motor name="lfootrz" joint="lfootrz" gear="20"/>
+    <motor name="lhandrx" joint="lhandrx" gear="20"/>
+    <motor name="lhandrz" joint="lhandrz" gear="20"/>
+    <motor name="lhumerusrx" joint="lhumerusrx" gear="40"/>
+    <motor name="lhumerusry" joint="lhumerusry" gear="40"/>
+    <motor name="lhumerusrz" joint="lhumerusrz" gear="40"/>
+    <motor name="lowerbackrx" joint="lowerbackrx" gear="40"/>
+    <motor name="lowerbackry" joint="lowerbackry" gear="40"/>
+    <motor name="lowerbackrz" joint="lowerbackrz" gear="40"/>
+    <motor name="lowerneckrx" joint="lowerneckrx" gear="20"/>
+    <motor name="lowerneckry" joint="lowerneckry" gear="20"/>
+    <motor name="lowerneckrz" joint="lowerneckrz" gear="20"/>
+    <motor name="lradiusrx" joint="lradiusrx" gear="40"/>
+    <motor name="lthumbrx" joint="lthumbrx" gear="20"/>
+    <motor name="lthumbrz" joint="lthumbrz" gear="20"/>
+    <motor name="ltibiarx" joint="ltibiarx" gear="80"/>
+    <motor name="ltoesrx" joint="ltoesrx" gear="20"/>
+    <motor name="lwristry" joint="lwristry" gear="20"/>
+    <motor name="rclaviclery" joint="rclaviclery" gear="20"/>
+    <motor name="rclaviclerz" joint="rclaviclerz" gear="20"/>
+    <motor name="rfemurrx" joint="rfemurrx" gear="120"/>
+    <motor name="rfemurry" joint="rfemurry" gear="40"/>
+    <motor name="rfemurrz" joint="rfemurrz" gear="40"/>
+    <motor name="rfingersrx" joint="rfingersrx" gear="20"/>
+    <motor name="rfootrx" joint="rfootrx" gear="20"/>
+    <motor name="rfootrz" joint="rfootrz" gear="20"/>
+    <motor name="rhandrx" joint="rhandrx" gear="20"/>
+    <motor name="rhandrz" joint="rhandrz" gear="20"/>
+    <motor name="rhumerusrx" joint="rhumerusrx" gear="40"/>
+    <motor name="rhumerusry" joint="rhumerusry" gear="40"/>
+    <motor name="rhumerusrz" joint="rhumerusrz" gear="40"/>
+    <motor name="rradiusrx" joint="rradiusrx" gear="40"/>
+    <motor name="rthumbrx" joint="rthumbrx" gear="20"/>
+    <motor name="rthumbrz" joint="rthumbrz" gear="20"/>
+    <motor name="rtibiarx" joint="rtibiarx" gear="80"/>
+    <motor name="rtoesrx" joint="rtoesrx" gear="20"/>
+    <motor name="rwristry" joint="rwristry" gear="20"/>
+    <motor name="thoraxrx" joint="thoraxrx" gear="40"/>
+    <motor name="thoraxry" joint="thoraxry" gear="40"/>
+    <motor name="thoraxrz" joint="thoraxrz" gear="40"/>
+    <motor name="upperbackrx" joint="upperbackrx" gear="40"/>
+    <motor name="upperbackry" joint="upperbackry" gear="40"/>
+    <motor name="upperbackrz" joint="upperbackrz" gear="40"/>
+    <motor name="upperneckrx" joint="upperneckrx" gear="20"/>
+    <motor name="upperneckry" joint="upperneckry" gear="20"/>
+    <motor name="upperneckrz" joint="upperneckrz" gear="20"/>
+  </actuator>
+
+  <sensor>
+    <subtreelinvel name="thorax_subtreelinvel" body="thorax"/>
+    <velocimeter name="sensor_root_veloc" site="root"/>
+    <gyro name="sensor_root_gyro" site="root"/>
+    <accelerometer name="sensor_root_accel" site="root"/>
+    <touch name="sensor_touch_ltoes" site="ltoes_touch"/>
+    <touch name="sensor_touch_rtoes" site="rtoes_touch"/>
+    <touch name="sensor_touch_rfoot" site="rfoot_touch"/>
+    <touch name="sensor_touch_lfoot" site="lfoot_touch"/>
+  </sensor>
+
+</mujoco>
