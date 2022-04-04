@@ -32,4 +32,16 @@ from lxml import etree
 import numpy as np
 from six.moves import range
 
-from dm_control.utils i
+from dm_control.utils import io as resources
+
+_DEFAULT_TIME_LIMIT = float('inf')
+_CONTROL_COST_COEF = 0.1
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets(n_bodies, n_actuators, random):
+  """Returns the model description as an XML string and a dict of assets.
+
+  Args:
+    n_bodies: An int, number of bodies of the LQR.
+   
