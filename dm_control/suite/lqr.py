@@ -44,4 +44,12 @@ def get_model_and_assets(n_bodies, n_actuators, random):
 
   Args:
     n_bodies: An int, number of bodies of the LQR.
-   
+    n_actuators: An int, number of actuated bodies of the LQR. `n_actuators`
+      should be less or equal than `n_bodies`.
+    random: A `numpy.random.RandomState` instance.
+
+  Returns:
+    A tuple `(model_xml_string, assets)`, where `assets` is a dict consisting of
+    `{filename: contents_string}` pairs.
+  """
+  re
