@@ -52,4 +52,12 @@ def get_model_and_assets(n_bodies, n_actuators, random):
     A tuple `(model_xml_string, assets)`, where `assets` is a dict consisting of
     `{filename: contents_string}` pairs.
   """
-  re
+  return _make_model(n_bodies, n_actuators, random), common.ASSETS
+
+
+@SUITE.add()
+def lqr_2_1(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+            environment_kwargs=None):
+  """Returns an LQR environment with 2 bodies of which the first is actuated."""
+  return _make_lqr(n_bodies=2,
+                   n_actua
