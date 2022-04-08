@@ -60,4 +60,14 @@ def lqr_2_1(time_limit=_DEFAULT_TIME_LIMIT, random=None,
             environment_kwargs=None):
   """Returns an LQR environment with 2 bodies of which the first is actuated."""
   return _make_lqr(n_bodies=2,
-                   n_actua
+                   n_actuators=1,
+                   control_cost_coef=_CONTROL_COST_COEF,
+                   time_limit=time_limit,
+                   random=random,
+                   environment_kwargs=environment_kwargs)
+
+
+@SUITE.add()
+def lqr_6_2(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+            environment_kwargs=None):
+  """Returns an LQR enviro
