@@ -70,4 +70,13 @@ def lqr_2_1(time_limit=_DEFAULT_TIME_LIMIT, random=None,
 @SUITE.add()
 def lqr_6_2(time_limit=_DEFAULT_TIME_LIMIT, random=None,
             environment_kwargs=None):
-  """Returns an LQR enviro
+  """Returns an LQR environment with 6 bodies of which first 2 are actuated."""
+  return _make_lqr(n_bodies=6,
+                   n_actuators=2,
+                   control_cost_coef=_CONTROL_COST_COEF,
+                   time_limit=time_limit,
+                   random=random,
+                   environment_kwargs=environment_kwargs)
+
+
+def _make_lqr(n_b
