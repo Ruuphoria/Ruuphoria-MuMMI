@@ -86,4 +86,10 @@ def _make_lqr(n_bodies, n_actuators, control_cost_coef, time_limit, random,
   Args:
     n_bodies: An int, number of bodies of the LQR.
     n_actuators: An int, number of actuated bodies of the LQR. `n_actuators`
-      should be less or equal than `n_bodie
+      should be less or equal than `n_bodies`.
+    control_cost_coef: A number, the coefficient of the control cost.
+    time_limit: An int, maximum time for each episode in seconds.
+    random: Either an existing `numpy.random.RandomState` instance, an
+      integer seed for creating a new `RandomState`, or None to select a seed
+      automatically.
+    environment_kw
