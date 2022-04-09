@@ -79,4 +79,11 @@ def lqr_6_2(time_limit=_DEFAULT_TIME_LIMIT, random=None,
                    environment_kwargs=environment_kwargs)
 
 
-def _make_lqr(n_b
+def _make_lqr(n_bodies, n_actuators, control_cost_coef, time_limit, random,
+              environment_kwargs):
+  """Returns a LQR environment.
+
+  Args:
+    n_bodies: An int, number of bodies of the LQR.
+    n_actuators: An int, number of actuated bodies of the LQR. `n_actuators`
+      should be less or equal than `n_bodie
