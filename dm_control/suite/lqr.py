@@ -92,4 +92,15 @@ def _make_lqr(n_bodies, n_actuators, control_cost_coef, time_limit, random,
     random: Either an existing `numpy.random.RandomState` instance, an
       integer seed for creating a new `RandomState`, or None to select a seed
       automatically.
-    environment_kw
+    environment_kwargs: A `dict` specifying keyword arguments for the
+      environment, or None.
+
+  Returns:
+    A LQR environment with `n_bodies` bodies of which first `n_actuators` are
+    actuated.
+  """
+
+  if not isinstance(random, np.random.RandomState):
+    random = np.random.RandomState(random)
+
+  model_strin
