@@ -108,4 +108,14 @@ def _make_lqr(n_bodies, n_actuators, control_cost_coef, time_limit, random,
   physics = Physics.from_xml_string(model_string, assets=assets)
   task = LQRLevel(control_cost_coef, random=random)
   environment_kwargs = environment_kwargs or {}
-  return control.Environment(physics,
+  return control.Environment(physics, task, time_limit=time_limit,
+                             **environment_kwargs)
+
+
+def _make_body(body_id, stiffness_range, damping_range, random):
+  """Returns an `etree.Element` defining a body.
+
+  Args:
+    body_id: Id of the created body.
+    stiffness_range: A tuple of (stiffness_lower_bound, stiffness_uppder_bound).
+      The stiffness of 
