@@ -118,4 +118,10 @@ def _make_body(body_id, stiffness_range, damping_range, random):
   Args:
     body_id: Id of the created body.
     stiffness_range: A tuple of (stiffness_lower_bound, stiffness_uppder_bound).
-      The stiffness of 
+      The stiffness of the joint is drawn uniformly from this range.
+    damping_range: A tuple of (damping_lower_bound, damping_upper_bound). The
+      damping of the joint is drawn uniformly from this range.
+    random: A `numpy.random.RandomState` instance.
+
+  Returns:
+   A new instance of `etree.Element`. A body element with two children:
