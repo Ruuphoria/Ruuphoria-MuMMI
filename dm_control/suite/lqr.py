@@ -134,4 +134,15 @@ def _make_body(body_id, stiffness_range, damping_range, random):
   body = etree.Element('body', name=body_name)
   body.set('pos', '.25 0 0')
   joint = etree.SubElement(body, 'joint', name=joint_name)
-  body.append(etree.Element('geom', n
+  body.append(etree.Element('geom', name=geom_name))
+  joint.set('stiffness',
+            str(random.uniform(stiffness_range[0], stiffness_range[1])))
+  joint.set('damping',
+            str(random.uniform(damping_range[0], damping_range[1])))
+  return body
+
+
+def _make_model(n_bodies,
+                n_actuators,
+                random,
+                stiffness_
