@@ -124,4 +124,14 @@ def _make_body(body_id, stiffness_range, damping_range, random):
     random: A `numpy.random.RandomState` instance.
 
   Returns:
-   A new instance of `etree.Element`. A body element with two children:
+   A new instance of `etree.Element`. A body element with two children: joint
+   and geom.
+  """
+  body_name = 'body_{}'.format(body_id)
+  joint_name = 'joint_{}'.format(body_id)
+  geom_name = 'geom_{}'.format(body_id)
+
+  body = etree.Element('body', name=body_name)
+  body.set('pos', '.25 0 0')
+  joint = etree.SubElement(body, 'joint', name=joint_name)
+  body.append(etree.Element('geom', n
