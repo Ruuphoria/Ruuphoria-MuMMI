@@ -145,4 +145,11 @@ def _make_body(body_id, stiffness_range, damping_range, random):
 def _make_model(n_bodies,
                 n_actuators,
                 random,
-                stiffness_
+                stiffness_range=(15, 25),
+                damping_range=(0, 0)):
+  """Returns an MJCF XML string defining a model of springs and dampers.
+
+  Args:
+    n_bodies: An integer, the number of bodies (DoFs) in the system.
+    n_actuators: An integer, the number of actuated bodies.
+    random: A `numpy.random.RandomState` ins
