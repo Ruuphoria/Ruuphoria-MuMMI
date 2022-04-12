@@ -103,4 +103,9 @@ def _make_lqr(n_bodies, n_actuators, control_cost_coef, time_limit, random,
   if not isinstance(random, np.random.RandomState):
     random = np.random.RandomState(random)
 
-  model_strin
+  model_string, assets = get_model_and_assets(n_bodies, n_actuators,
+                                              random=random)
+  physics = Physics.from_xml_string(model_string, assets=assets)
+  task = LQRLevel(control_cost_coef, random=random)
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(physics,
