@@ -159,4 +159,14 @@ def _make_model(n_bodies,
       damping is sampled uniformly from this interval.
 
   Returns:
-    An MJCF 
+    An MJCF string describing the linear system.
+
+  Raises:
+    ValueError: If the number of bodies or actuators is erronous.
+  """
+  if n_bodies < 1 or n_actuators < 1:
+    raise ValueError('At least 1 body and 1 actuator required.')
+  if n_actuators > n_bodies:
+    raise ValueError('At most 1 actuator per body.')
+
+  file_path = os
