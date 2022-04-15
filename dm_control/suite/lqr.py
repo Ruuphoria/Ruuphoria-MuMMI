@@ -152,4 +152,11 @@ def _make_model(n_bodies,
   Args:
     n_bodies: An integer, the number of bodies (DoFs) in the system.
     n_actuators: An integer, the number of actuated bodies.
-    random: A `numpy.random.RandomState` ins
+    random: A `numpy.random.RandomState` instance.
+    stiffness_range: A tuple containing minimum and maximum stiffness. Each
+      joint's stiffness is sampled uniformly from this interval.
+    damping_range: A tuple containing minimum and maximum damping. Each joint's
+      damping is sampled uniformly from this interval.
+
+  Returns:
+    An MJCF 
