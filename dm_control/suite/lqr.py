@@ -177,4 +177,12 @@ def _make_model(n_bodies,
   tendon = etree.SubElement(mjcf.getroot(), 'tendon')
 
   for body in range(n_bodies):
-    # Inse
+    # Inserting body.
+    child = _make_body(body, stiffness_range, damping_range, random)
+    site_name = 'site_{}'.format(body)
+    child.append(etree.Element('site', name=site_name))
+
+    if body == 0:
+      child.set('pos', '.25 0 .1')
+    # Add actuators to the first n_actuators bodies.
+ 
