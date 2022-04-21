@@ -185,4 +185,11 @@ def _make_model(n_bodies,
     if body == 0:
       child.set('pos', '.25 0 .1')
     # Add actuators to the first n_actuators bodies.
- 
+    if body < n_actuators:
+      # Adding actuator.
+      joint_name = 'joint_{}'.format(body)
+      motor_name = 'motor_{}'.format(body)
+      child.find('joint').set('name', joint_name)
+      actuator.append(etree.Element('motor', name=motor_name, joint=joint_name))
+
+    # Add a tendon between consecutive bodies (for visualisation 
