@@ -210,4 +210,16 @@ class Physics(mujoco.Physics):
 
   def state_norm(self):
     """Returns the norm of the physics state."""
- 
+    return np.linalg.norm(self.state())
+
+
+class LQRLevel(base.Task):
+  """A Linear Quadratic Regulator `Task`."""
+
+  _TERMINAL_TOL = 1e-6
+
+  def __init__(self, control_cost_coef, random=None):
+    """Initializes an LQR level with cost = sum(states^2) + c*sum(controls^2).
+
+    Args:
+      control_cost_coef: The 
