@@ -240,4 +240,12 @@ class LQRLevel(base.Task):
   def control_cost_coef(self):
     return self._control_cost_coef
 
-  def initialize_episode(self
+  def initialize_episode(self, physics):
+    """Random state sampled from a unit sphere."""
+    ndof = physics.model.nq
+    unit = self.random.randn(ndof)
+    physics.data.qpos[:] = np.sqrt(2) * unit / np.linalg.norm(unit)
+    super(LQRLevel, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns 
