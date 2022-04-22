@@ -248,4 +248,13 @@ class LQRLevel(base.Task):
     super(LQRLevel, self).initialize_episode(physics)
 
   def get_observation(self, physics):
-    """Returns 
+    """Returns an observation of the state."""
+    obs = collections.OrderedDict()
+    obs['position'] = physics.position()
+    obs['velocity'] = physics.velocity()
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a quadratic state and control reward."""
+    position = physics.position()
+    
