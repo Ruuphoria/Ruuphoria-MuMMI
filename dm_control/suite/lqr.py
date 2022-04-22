@@ -192,4 +192,10 @@ def _make_model(n_bodies,
       child.find('joint').set('name', joint_name)
       actuator.append(etree.Element('motor', name=motor_name, joint=joint_name))
 
-    # Add a tendon between consecutive bodies (for visualisation 
+    # Add a tendon between consecutive bodies (for visualisation purposes only).
+    if body < n_bodies - 1:
+      child_site_name = 'site_{}'.format(body + 1)
+      tendon_name = 'tendon_{}'.format(body)
+      spatial = etree.SubElement(tendon, 'spatial', name=tendon_name)
+      spatial.append(etree.Element('site', site=site_name))
+      spatial.append(etree.El
