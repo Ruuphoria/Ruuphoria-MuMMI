@@ -264,4 +264,9 @@ class LQRLevel(base.Task):
 
   def get_evaluation(self, physics):
     """Returns a sparse evaluation reward that is not used for learning."""
-    return float(p
+    return float(physics.state_norm() <= 0.01)
+
+  def get_termination(self, physics):
+    """Terminates when the state norm is smaller than epsilon."""
+    if physics.state_norm() < self._TERMINAL_TOL:
+      return 0.0
