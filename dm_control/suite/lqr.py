@@ -257,4 +257,11 @@ class LQRLevel(base.Task):
   def get_reward(self, physics):
     """Returns a quadratic state and control reward."""
     position = physics.position()
-    
+    state_cost = 0.5 * np.dot(position, position)
+    control_signal = physics.control()
+    control_l2_norm = 0.5 * np.dot(control_signal, control_signal)
+    return 1 - (state_cost + control_l2_norm * self._control_cost_coef)
+
+  def get_evaluation(self, physics):
+    """Returns a sparse evaluation reward that is not used for learning."""
+    return float(p
