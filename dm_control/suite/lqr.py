@@ -230,4 +230,14 @@ class LQRLevel(base.Task):
     Raises:
       ValueError: If the control cost coefficient is not positive.
     """
- 
+    if control_cost_coef <= 0:
+      raise ValueError('control_cost_coef must be positive.')
+
+    self._control_cost_coef = control_cost_coef
+    super(LQRLevel, self).__init__(random=random)
+
+  @property
+  def control_cost_coef(self):
+    return self._control_cost_coef
+
+  def initialize_episode(self
