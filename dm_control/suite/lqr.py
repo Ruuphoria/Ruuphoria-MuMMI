@@ -198,4 +198,16 @@ def _make_model(n_bodies,
       tendon_name = 'tendon_{}'.format(body)
       spatial = etree.SubElement(tendon, 'spatial', name=tendon_name)
       spatial.append(etree.Element('site', site=site_name))
-      spatial.append(etree.El
+      spatial.append(etree.Element('site', site=child_site_name))
+    parent.append(child)
+    parent = child
+
+  return etree.tostring(mjcf, pretty_print=True)
+
+
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the LQR domain."""
+
+  def state_norm(self):
+    """Returns the norm of the physics state."""
+ 
