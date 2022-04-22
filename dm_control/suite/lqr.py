@@ -222,4 +222,12 @@ class LQRLevel(base.Task):
     """Initializes an LQR level with cost = sum(states^2) + c*sum(controls^2).
 
     Args:
-      control_cost_coef: The 
+      control_cost_coef: The coefficient of the control cost.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+
+    Raises:
+      ValueError: If the control cost coefficient is not positive.
+    """
+ 
