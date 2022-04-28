@@ -28,4 +28,14 @@ import numpy as np
 import scipy.linalg as scipy_linalg
 
 
-def so
+def solve(env):
+  """Returns the optimal value and policy for LQR problem.
+
+  Args:
+    env: An instance of `control.EnvironmentV2` with LQR level.
+
+  Returns:
+    p: A numpy array, the Hessian of the optimal total cost-to-go (value
+      function at state x) is V(x) = .5 * x' * p * x.
+    k: A numpy array which gives the optimal linear policy u = k * x.
+    beta: 
