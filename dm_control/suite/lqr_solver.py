@@ -38,4 +38,15 @@ def solve(env):
     p: A numpy array, the Hessian of the optimal total cost-to-go (value
       function at state x) is V(x) = .5 * x' * p * x.
     k: A numpy array which gives the optimal linear policy u = k * x.
-    beta: 
+    beta: The maximum eigenvalue of (a + b * k). Under optimal policy, at
+      timestep n the state tends to 0 like beta^n.
+
+  Raises:
+    RuntimeError: If the controlled system is unstable.
+  """
+  n = env.physics.model.nq  # number of DoFs
+  m = env.physics.model.nu  # number of controls
+
+  # Compute the mass matrix.
+  mass = np.zeros((n, n))
+  wrapper.mjbi
