@@ -49,4 +49,11 @@ def solve(env):
 
   # Compute the mass matrix.
   mass = np.zeros((n, n))
-  wrapper.mjbi
+  wrapper.mjbindings.mjlib.mj_fullM(env.physics.model.ptr, mass,
+                                    env.physics.data.qM)
+
+  # Compute input matrices a, b, q and r to the DARE solvers.
+  # State transition matrix a.
+  stiffness = np.diag(env.physics.model.jnt_stiffness.ravel())
+  damping = np.diag(env.physics.model.dof_damping.ravel())
+  dt = env.physics.model.
