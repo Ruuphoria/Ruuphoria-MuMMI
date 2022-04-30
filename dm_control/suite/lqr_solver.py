@@ -56,4 +56,15 @@ def solve(env):
   # State transition matrix a.
   stiffness = np.diag(env.physics.model.jnt_stiffness.ravel())
   damping = np.diag(env.physics.model.dof_damping.ravel())
-  dt = env.physics.model.
+  dt = env.physics.model.opt.timestep
+
+  j = np.linalg.solve(-mass, np.hstack((stiffness, damping)))
+  a = np.eye(2 * n) + dt * np.vstack(
+      (dt * j + np.hstack((np.zeros((n, n)), np.eye(n))), j))
+
+  # Control transition matrix b.
+  b = env.physics.data.actuator_moment.T
+  bc = np.linalg.solve(mass, b)
+  b = dt * np.vstack((dt * bc, bc))
+
+  # State cost Hess
