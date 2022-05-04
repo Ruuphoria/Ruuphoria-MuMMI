@@ -77,4 +77,8 @@ def solve(env):
   p = scipy_linalg.solve_discrete_are(a, b, q, r)
   k = -np.linalg.solve(b.T.dot(p.dot(b)) + r, b.T.dot(p.dot(a)))
 
-  
+  # Under optimal policy, state tends to 0 like beta^n_timesteps
+  beta = np.abs(np.linalg.eigvals(a + b.dot(k))).max()
+  if beta >= 1.0:
+    raise RuntimeError('Controlled system is unstable.')
+  return p, k, beta
