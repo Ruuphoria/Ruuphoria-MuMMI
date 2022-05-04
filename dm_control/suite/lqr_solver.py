@@ -67,4 +67,14 @@ def solve(env):
   bc = np.linalg.solve(mass, b)
   b = dt * np.vstack((dt * bc, bc))
 
-  # State cost Hess
+  # State cost Hessian q.
+  q = np.diag(np.hstack([np.ones(n), np.zeros(n)]))
+
+  # Control cost Hessian r.
+  r = env.task.control_cost_coef * np.eye(m)
+
+  # Solve the discrete algebraic Riccati equation.
+  p = scipy_linalg.solve_discrete_are(a, b, q, r)
+  k = -np.linalg.solve(b.T.dot(p.dot(b)) + r, b.T.dot(p.dot(a)))
+
+  
