@@ -31,4 +31,15 @@ import numpy as np
 from six.moves import range
 
 
-class LqrTest(paramete
+class LqrTest(parameterized.TestCase):
+
+  @parameterized.named_parameters(
+      ('lqr_2_1', lqr.lqr_2_1),
+      ('lqr_6_2', lqr.lqr_6_2))
+  def test_lqr_optimal_policy(self, make_env):
+    env = make_env()
+    p, k, beta = lqr_solver.solve(env)
+    self.assertPolicyisOptimal(env, p, k, beta)
+
+  def assertPolicyisOptimal(self, env, p, k, beta):
+    tolerance = 1e-
