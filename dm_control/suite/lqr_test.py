@@ -42,4 +42,11 @@ class LqrTest(parameterized.TestCase):
     self.assertPolicyisOptimal(env, p, k, beta)
 
   def assertPolicyisOptimal(self, env, p, k, beta):
-    tolerance = 1e-
+    tolerance = 1e-3
+    n_steps = int(math.ceil(math.log10(tolerance) / math.log10(beta)))
+    logging.info('%d timesteps for %g convergence.', n_steps, tolerance)
+    total_loss = 0.0
+
+    timestep = env.reset()
+    initial_state = np.hstack((timestep.observation['position'],
+                               timestep.observation['velocity']))
