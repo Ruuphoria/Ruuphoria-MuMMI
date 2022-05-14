@@ -50,3 +50,11 @@ class LqrTest(parameterized.TestCase):
     timestep = env.reset()
     initial_state = np.hstack((timestep.observation['position'],
                                timestep.observation['velocity']))
+    logging.info('Measuring total cost over %d steps.', n_steps)
+    for _ in range(n_steps):
+      x = np.hstack((timestep.observation['position'],
+                     timestep.observation['velocity']))
+      # u = k*x is the optimal policy
+      u = k.dot(x)
+      total_loss += 1 - (timestep.reward or 0.0)
+      timestep = env.
