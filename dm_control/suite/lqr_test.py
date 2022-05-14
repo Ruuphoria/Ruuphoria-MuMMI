@@ -57,4 +57,12 @@ class LqrTest(parameterized.TestCase):
       # u = k*x is the optimal policy
       u = k.dot(x)
       total_loss += 1 - (timestep.reward or 0.0)
-      timestep = env.
+      timestep = env.step(u)
+
+    logging.info('Analytical expected total cost is .5*x^T*p*x.')
+    expected_loss = .5 * initial_state.T.dot(p).dot(initial_state)
+    logging.info('Comparing measured and predicted costs.')
+    np.testing.assert_allclose(expected_loss, total_loss, rtol=tolerance)
+
+if __name__ == '__main__':
+  absltest.main()
