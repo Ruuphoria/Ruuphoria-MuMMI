@@ -1,0 +1,58 @@
+
+<mujoco model="planar manipulator">
+
+  <include file="./common/visual.xml"/>
+  <include file="./common/skybox.xml"/>
+  <include file="./common/materials.xml"/>
+  <asset>
+    <texture name="background" builtin="flat" type="2d" mark="random" markrgb="1 1 1" width="800" height="800" rgb1=".2 .3 .4"/>
+    <material name="background" texture="background" texrepeat="1 1" texuniform="true"/>
+  </asset>
+
+  <visual>
+    <map shadowclip=".5"/>
+    <quality shadowsize="2048"/>
+  </visual>>
+
+  <option timestep="0.001" cone="elliptic"/>
+
+  <default>
+    <geom friction=".7" solimp="0.9 0.97 0.001" solref=".005 1"/>
+    <joint solimplimit="0 0.99 0.01" solreflimit=".005 1"/>
+    <general ctrllimited="true"/>
+    <tendon width="0.01"/>
+    <site size=".003 .003 .003" material="site" group="3"/>
+
+    <default class="arm">
+      <geom type="capsule" material="self" density="500"/>
+      <joint type="hinge" pos="0 0 0" axis="0 -1 0" limited="true"/>
+      <default class="hand">
+        <joint damping=".5" range="-10 60"/>
+        <geom size=".008"/>
+        <site  type="box" size=".018 .005 .005" pos=".022 0 -.002" euler="0 15 0" group="4"/>
+        <default class="fingertip">
+          <geom type="sphere" size=".008" material="effector"/>
+          <joint damping=".01" stiffness=".01" range="-40 20"/>
+          <site  size=".012 .005 .008" pos=".003 0 .003" group="4" euler="0 0 0"/>
+        </default>
+      </default>
+    </default>
+
+    <default class="object">
+      <geom material="self"/>
+    </default>
+
+    <default class="task">
+      <site rgba="0 0 0 0"/>
+    </default>
+
+    <default class="obstacle">
+      <geom material="decoration" friction="0"/>
+    </default>
+
+    <default class="ghost">
+      <geom material="target" contype="0" conaffinity="0"/>
+    </default>
+  </default>
+
+  <worldbody>
