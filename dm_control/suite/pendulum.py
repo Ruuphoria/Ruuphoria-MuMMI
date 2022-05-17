@@ -44,3 +44,9 @@ def get_model_and_assets():
 @SUITE.add('benchmarking')
 def swingup(time_limit=_DEFAULT_TIME_LIMIT, random=None,
             environment_kwargs=None):
+  """Returns pendulum swingup task ."""
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = SwingUp(random=random)
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, **environment_kwar
