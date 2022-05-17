@@ -21,4 +21,15 @@ from __future__ import print_function
 
 import collections
 
-from dm_control impo
+from dm_control import mujoco
+from dm_control.rl import control
+from dm_control.suite import base
+from dm_control.suite import common
+from dm_control.utils import containers
+from dm_control.utils import rewards
+import numpy as np
+
+
+_DEFAULT_TIME_LIMIT = 20
+_ANGLE_BOUND = 8
+_COSINE_BOUND = np.cos(np.deg2rad(_ANGLE_BO
