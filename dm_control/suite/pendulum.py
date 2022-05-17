@@ -32,4 +32,15 @@ import numpy as np
 
 _DEFAULT_TIME_LIMIT = 20
 _ANGLE_BOUND = 8
-_COSINE_BOUND = np.cos(np.deg2rad(_ANGLE_BO
+_COSINE_BOUND = np.cos(np.deg2rad(_ANGLE_BOUND))
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('pendulum.xml'), common.ASSETS
+
+
+@SUITE.add('benchmarking')
+def swingup(time_limit=_DEFAULT_TIME_LIMIT, random=None,
+            environment_kwargs=None):
