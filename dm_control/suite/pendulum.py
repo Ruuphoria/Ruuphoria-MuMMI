@@ -60,4 +60,16 @@ class Physics(mujoco.Physics):
     return self.named.data.xmat['pole', 'zz']
 
   def angular_velocity(self):
-    """Returns the angular velocity of the pole.
+    """Returns the angular velocity of the pole."""
+    return self.named.data.qvel['hinge'].copy()
+
+  def pole_orientation(self):
+    """Returns both horizontal and vertical components of pole frame."""
+    return self.named.data.xmat['pole', ['zz', 'xz']]
+
+
+class SwingUp(base.Task):
+  """A Pendulum `Task` to swing up and balance the pole."""
+
+  def __init__(self, random=None):
+    ""
