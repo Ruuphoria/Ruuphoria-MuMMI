@@ -49,4 +49,15 @@ def swingup(time_limit=_DEFAULT_TIME_LIMIT, random=None,
   task = SwingUp(random=random)
   environment_kwargs = environment_kwargs or {}
   return control.Environment(
-      physics, task, time_limit=time_limit, **environment_kwar
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the Pendulum domain."""
+
+  def pole_vertical(self):
+    """Returns vertical (z) component of pole frame."""
+    return self.named.data.xmat['pole', 'zz']
+
+  def angular_velocity(self):
+    """Returns the angular velocity of the pole.
