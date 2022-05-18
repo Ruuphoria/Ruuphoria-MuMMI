@@ -72,4 +72,13 @@ class SwingUp(base.Task):
   """A Pendulum `Task` to swing up and balance the pole."""
 
   def __init__(self, random=None):
-    ""
+    """Initialize an instance of `Pendulum`.
+
+    Args:
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    super(SwingUp, self).__init__(random=random)
+
+  def init
