@@ -81,4 +81,14 @@ class SwingUp(base.Task):
     """
     super(SwingUp, self).__init__(random=random)
 
-  def init
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode.
+
+    Pole is set to a random angle between [-pi, pi).
+
+    Args:
+      physics: An instance of `Physics`.
+
+    """
+    physics.named.data.qpos['hinge'] = self.random.uniform(-np.pi, np.pi)
+    super(SwingUp, self).initial
