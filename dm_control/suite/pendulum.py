@@ -91,4 +91,18 @@ class SwingUp(base.Task):
 
     """
     physics.named.data.qpos['hinge'] = self.random.uniform(-np.pi, np.pi)
-    super(SwingUp, self).initial
+    super(SwingUp, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation.
+
+    Observations are states concatenating pole orientation and angular velocity
+    and pixels from fixed camera.
+
+    Args:
+      physics: An instance of `physics`, Pendulum physics.
+
+    Returns:
+      A `dict` of observation.
+    """
+    obs = coll
