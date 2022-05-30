@@ -105,4 +105,10 @@ class SwingUp(base.Task):
     Returns:
       A `dict` of observation.
     """
-    obs = coll
+    obs = collections.OrderedDict()
+    obs['orientation'] = physics.pole_orientation()
+    obs['velocity'] = physics.angular_velocity()
+    return obs
+
+  def get_reward(self, physics):
+    return rewards.tolerance(physics.pole_vertical(), (_COSINE_BOUND, 1))
