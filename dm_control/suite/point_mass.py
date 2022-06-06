@@ -25,4 +25,15 @@ from dm_control import mujoco
 from dm_control.rl import control
 from dm_control.suite import base
 from dm_control.suite import common
-from dm_control.suite.utils import rand
+from dm_control.suite.utils import randomizers
+from dm_control.utils import containers
+from dm_control.utils import rewards
+import numpy as np
+
+_DEFAULT_TIME_LIMIT = 20
+SUITE = containers.TaggedTasks()
+
+
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('point_mass.xml'), common.ASSETS
