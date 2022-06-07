@@ -54,4 +54,13 @@ def hard(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
   """Returns the hard point_mass task."""
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = PointMass(randomize_gains=True, random=random)
-  environment_
+  environment_kwargs = environment_kwargs or {}
+  return control.Environment(
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+class Physics(mujoco.Physics):
+  """physics for the point_mass domain."""
+
+  def mass_to_target(self):
+    """Returns the vector from mass to target in glob
