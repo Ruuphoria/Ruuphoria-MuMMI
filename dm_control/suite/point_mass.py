@@ -45,4 +45,13 @@ def easy(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
   physics = Physics.from_xml_string(*get_model_and_assets())
   task = PointMass(randomize_gains=False, random=random)
   environment_kwargs = environment_kwargs or {}
-  return control.Envir
+  return control.Environment(
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+@SUITE.add()
+def hard(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
+  """Returns the hard point_mass task."""
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = PointMass(randomize_gains=True, random=random)
+  environment_
