@@ -73,4 +73,12 @@ class Physics(mujoco.Physics):
 
 
 class PointMass(base.Task):
-  """A point_mass `Task` to reach target wit
+  """A point_mass `Task` to reach target with smooth reward."""
+
+  def __init__(self, randomize_gains, random=None):
+    """Initialize an instance of `PointMass`.
+
+    Args:
+      randomize_gains: A `bool`, whether to randomize the actuator gains.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+        integer seed for creating a new `RandomState
