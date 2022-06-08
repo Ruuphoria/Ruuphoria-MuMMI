@@ -63,4 +63,14 @@ class Physics(mujoco.Physics):
   """physics for the point_mass domain."""
 
   def mass_to_target(self):
-    """Returns the vector from mass to target in glob
+    """Returns the vector from mass to target in global coordinate."""
+    return (self.named.data.geom_xpos['target'] -
+            self.named.data.geom_xpos['pointmass'])
+
+  def mass_to_target_dist(self):
+    """Returns the distance from mass to the target."""
+    return np.linalg.norm(self.mass_to_target())
+
+
+class PointMass(base.Task):
+  """A point_mass `Task` to reach target wit
