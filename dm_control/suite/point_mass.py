@@ -81,4 +81,13 @@ class PointMass(base.Task):
     Args:
       randomize_gains: A `bool`, whether to randomize the actuator gains.
       random: Optional, either a `numpy.random.RandomState` instance, an
-        integer seed for creating a new `RandomState
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    self._randomize_gains = randomize_gains
+    super(PointMass, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode.
+
+       If _randomize_gains is True,
