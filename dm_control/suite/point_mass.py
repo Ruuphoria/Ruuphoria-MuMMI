@@ -90,4 +90,11 @@ class PointMass(base.Task):
   def initialize_episode(self, physics):
     """Sets the state of the environment at the start of each episode.
 
-       If _randomize_gains is True,
+       If _randomize_gains is True, the relationship between the controls and
+       the joints is randomized, so that each control actuates a random linear
+       combination of joints.
+
+    Args:
+      physics: An instance of `mujoco.Physics`.
+    """
+    randomizers.randomize_limited_and_rotational_joints(physics, self.ran
