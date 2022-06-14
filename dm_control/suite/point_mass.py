@@ -106,4 +106,12 @@ class PointMass(base.Task):
       while parallel:
         dir2 = self.random.randn(2)
         dir2 /= np.linalg.norm(dir2)
-        parallel 
+        parallel = abs(np.dot(dir1, dir2)) > 0.9
+      physics.model.wrap_prm[[0, 1]] = dir1
+      physics.model.wrap_prm[[2, 3]] = dir2
+    super(PointMass, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation of the state."""
+    obs = collections.OrderedDict()
+    obs['
