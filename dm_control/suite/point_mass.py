@@ -97,4 +97,13 @@ class PointMass(base.Task):
     Args:
       physics: An instance of `mujoco.Physics`.
     """
-    randomizers.randomize_limited_and_rotational_joints(physics, self.ran
+    randomizers.randomize_limited_and_rotational_joints(physics, self.random)
+    if self._randomize_gains:
+      dir1 = self.random.randn(2)
+      dir1 /= np.linalg.norm(dir1)
+      # Find another actuation direction that is not 'too parallel' to dir1.
+      parallel = True
+      while parallel:
+        dir2 = self.random.randn(2)
+        dir2 /= np.linalg.norm(dir2)
+        parallel 
