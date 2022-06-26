@@ -122,4 +122,9 @@ class PointMass(base.Task):
     """Returns a reward to the agent."""
     target_size = physics.named.model.geom_size['target', 0]
     near_target = rewards.tolerance(physics.mass_to_target_dist(),
-                  
+                                    bounds=(0, target_size), margin=target_size)
+    control_reward = rewards.tolerance(physics.control(), margin=1,
+                                       value_at_margin=0,
+                                       sigmoid='quadratic').mean()
+    small_control = (control_reward + 4) / 5
+    return near_target 
