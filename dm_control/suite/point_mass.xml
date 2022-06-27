@@ -1,0 +1,11 @@
+<mujoco model="planar point mass">
+  <include file="./common/skybox.xml"/>
+  <include file="./common/visual.xml"/>
+  <include file="./common/materials.xml"/>
+
+  <option timestep="0.02">
+    <flag contact="disable"/>
+  </option>
+
+  <default>
+    <joint type="hinge" axis="0 0 1" limited="true" range="-.29 .29" dam

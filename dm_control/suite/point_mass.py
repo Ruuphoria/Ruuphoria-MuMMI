@@ -127,4 +127,4 @@ class PointMass(base.Task):
                                        value_at_margin=0,
                                        sigmoid='quadratic').mean()
     small_control = (control_reward + 4) / 5
-    return near_target 
+    return near_target * small_control
