@@ -213,3 +213,117 @@
       <joint joint="ankle_front_left"      coef=".333"/>
     </fixed>
     <fixed name="coupling_front_right">
+      <joint joint="pitch_front_right"      coef=".333"/>
+      <joint joint="knee_front_right"       coef=".333"/>
+      <joint joint="ankle_front_right"      coef=".333"/>
+    </fixed>
+    <fixed name="coupling_back_right">
+      <joint joint="pitch_back_right"      coef=".333"/>
+      <joint joint="knee_back_right"       coef=".333"/>
+      <joint joint="ankle_back_right"      coef=".333"/>
+    </fixed>
+    <fixed name="coupling_back_left">
+      <joint joint="pitch_back_left"      coef=".333"/>
+      <joint joint="knee_back_left"       coef=".333"/>
+      <joint joint="ankle_back_left"      coef=".333"/>
+    </fixed>
+
+    <fixed name="extend_front_left">
+      <joint joint="pitch_front_left"      coef=".25"/>
+      <joint joint="knee_front_left"       coef="-.5"/>
+      <joint joint="ankle_front_left"      coef=".25"/>
+    </fixed>
+    <fixed name="lift_front_left">
+      <joint joint="pitch_front_left"      coef=".5"/>
+      <joint joint="ankle_front_left"      coef="-.5"/>
+    </fixed>
+
+    <fixed name="extend_front_right">
+      <joint joint="pitch_front_right"     coef=".25"/>
+      <joint joint="knee_front_right"      coef="-.5"/>
+      <joint joint="ankle_front_right"     coef=".25"/>
+    </fixed>
+    <fixed name="lift_front_right">
+      <joint joint="pitch_front_right"     coef=".5"/>
+      <joint joint="ankle_front_right"     coef="-.5"/>
+    </fixed>
+
+    <fixed name="extend_back_right">
+      <joint joint="pitch_back_right"     coef=".25"/>
+      <joint joint="knee_back_right"      coef="-.5"/>
+      <joint joint="ankle_back_right"     coef=".25"/>
+    </fixed>
+    <fixed name="lift_back_right">
+      <joint joint="pitch_back_right"     coef=".5"/>
+      <joint joint="ankle_back_right"     coef="-.5"/>
+    </fixed>
+
+    <fixed name="extend_back_left">
+      <joint joint="pitch_back_left"      coef=".25"/>
+      <joint joint="knee_back_left"       coef="-.5"/>
+      <joint joint="ankle_back_left"      coef=".25"/>
+    </fixed>
+    <fixed name="lift_back_left">
+      <joint joint="pitch_back_left"     coef=".5"/>
+      <joint joint="ankle_back_left"     coef="-.5"/>
+    </fixed>
+  </tendon>
+
+  <equality>
+    <tendon name="coupling_front_left" tendon1="coupling_front_left" class="coupling"/>
+    <tendon name="coupling_front_right" tendon1="coupling_front_right" class="coupling"/>
+    <tendon name="coupling_back_right" tendon1="coupling_back_right" class="coupling"/>
+    <tendon name="coupling_back_left" tendon1="coupling_back_left" class="coupling"/>
+  </equality>
+
+  <actuator>
+    <general name="yaw_front_left" class="yaw_act" joint="yaw_front_left"/>
+    <general name="lift_front_left" class="lift_act" tendon="lift_front_left"/>
+    <general name="extend_front_left" class="extend_act" tendon="extend_front_left"/>
+    <general name="yaw_front_right" class="yaw_act" joint="yaw_front_right"/>
+    <general name="lift_front_right" class="lift_act" tendon="lift_front_right"/>
+    <general name="extend_front_right" class="extend_act" tendon="extend_front_right"/>
+    <general name="yaw_back_right" class="yaw_act" joint="yaw_back_right"/>
+    <general name="lift_back_right" class="lift_act" tendon="lift_back_right"/>
+    <general name="extend_back_right" class="extend_act" tendon="extend_back_right"/>
+    <general name="yaw_back_left" class="yaw_act" joint="yaw_back_left"/>
+    <general name="lift_back_left" class="lift_act" tendon="lift_back_left"/>
+    <general name="extend_back_left" class="extend_act" tendon="extend_back_left"/>
+  </actuator>
+
+  <sensor>
+    <accelerometer name="imu_accel" site="torso"/>
+    <gyro name="imu_gyro" site="torso"/>
+    <velocimeter name="velocimeter" site="torso"/>
+    <force name="force_toe_front_left" site="toe_front_left"/>
+    <force name="force_toe_front_right" site="toe_front_right"/>
+    <force name="force_toe_back_right" site="toe_back_right"/>
+    <force name="force_toe_back_left" site="toe_back_left"/>
+    <torque name="torque_toe_front_left" site="toe_front_left"/>
+    <torque name="torque_toe_front_right" site="toe_front_right"/>
+    <torque name="torque_toe_back_right" site="toe_back_right"/>
+    <torque name="torque_toe_back_left" site="toe_back_left"/>
+    <subtreecom name="center_of_mass" body="torso"/>
+    <rangefinder name="rf_00" site="rf_00"/>
+    <rangefinder name="rf_01" site="rf_01"/>
+    <rangefinder name="rf_02" site="rf_02"/>
+    <rangefinder name="rf_03" site="rf_03"/>
+    <rangefinder name="rf_04" site="rf_04"/>
+    <rangefinder name="rf_10" site="rf_10"/>
+    <rangefinder name="rf_11" site="rf_11"/>
+    <rangefinder name="rf_12" site="rf_12"/>
+    <rangefinder name="rf_13" site="rf_13"/>
+    <rangefinder name="rf_14" site="rf_14"/>
+    <rangefinder name="rf_20" site="rf_20"/>
+    <rangefinder name="rf_21" site="rf_21"/>
+    <rangefinder name="rf_22" site="rf_22"/>
+    <rangefinder name="rf_23" site="rf_23"/>
+    <rangefinder name="rf_24" site="rf_24"/>
+    <rangefinder name="rf_30" site="rf_30"/>
+    <rangefinder name="rf_31" site="rf_31"/>
+    <rangefinder name="rf_32" site="rf_32"/>
+    <rangefinder name="rf_33" site="rf_33"/>
+    <rangefinder name="rf_34" site="rf_34"/>
+  </sensor>
+
+</mujoco>
