@@ -374,3 +374,108 @@ class Escape(base.Task):
     res = physics.model.hfield_nrow[_HEIGHTFIELD_ID]
     assert res == physics.model.hfield_ncol[_HEIGHTFIELD_ID]
     # Sinusoidal bowl shape.
+    row_grid, col_grid = np.ogrid[-1:1:res*1j, -1:1:res*1j]
+    radius = np.clip(np.sqrt(col_grid**2 + row_grid**2), .04, 1)
+    bowl_shape = .5 - np.cos(2*np.pi*radius)/2
+    # Random smooth bumps.
+    terrain_size = 2 * physics.model.hfield_size[_HEIGHTFIELD_ID, 0]
+    bump_res = int(terrain_size / _TERRAIN_BUMP_SCALE)
+    bumps = self.random.uniform(_TERRAIN_SMOOTHNESS, 1, (bump_res, bump_res))
+    smooth_bumps = ndimage.zoom(bumps, res / float(bump_res))
+    # Terrain is elementwise product.
+    terrain = bowl_shape * smooth_bumps
+    start_idx = physics.model.hfield_adr[_HEIGHTFIELD_ID]
+    physics.model.hfield_data[start_idx:start_idx+res**2] = terrain.ravel()
+    super(Escape, self).initialize_episode(physics)
+
+    # If we have a rendering context, we need to re-upload the modified
+    # heightfield data.
+    if physics.contexts:
+      with physics.contexts.gl.make_current() as ctx:
+        ctx.call(mjlib.mjr_uploadHField,
+                 physics.model.ptr,
+                 physics.contexts.mujoco.ptr,
+                 _HEIGHTFIELD_ID)
+
+    # Initial configuration.
+    orientation = self.random.randn(4)
+    orientation /= np.linalg.norm(orientation)
+    _find_non_contacting_height(physics, orientation)
+
+  def get_observation(self, physics):
+    """Returns an observation to the agent."""
+    obs = _common_observations(physics)
+    obs['origin'] = physics.origin()
+    obs['rangefinder'] = physics.rangefinder()
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a reward to the agent."""
+
+    # Escape reward term.
+    terrain_size = physics.model.hfield_size[_HEIGHTFIELD_ID, 0]
+    escape_reward = rewards.tolerance(
+        physics.origin_distance(),
+        bounds=(terrain_size, float('inf')),
+        margin=terrain_size,
+        value_at_margin=0,
+        sigmoid='linear')
+
+    return _upright_reward(physics, deviation_angle=20) * escape_reward
+
+
+class Fetch(base.Task):
+  """A quadruped task solved by bringing a ball to the origin."""
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of each episode.
+
+    Args:
+      physics: An instance of `Physics`.
+
+    """
+    # Initial configuration, random azimuth and horizontal position.
+    azimuth = self.random.uniform(0, 2*np.pi)
+    orientation = np.array((np.cos(azimuth/2), 0, 0, np.sin(azimuth/2)))
+    spawn_radius = 0.9 * physics.named.model.geom_size['floor', 0]
+    x_pos, y_pos = self.random.uniform(-spawn_radius, spawn_radius, size=(2,))
+    _find_non_contacting_height(physics, orientation, x_pos, y_pos)
+
+    # Initial ball state.
+    physics.named.data.qpos['ball_root'][:2] = self.random.uniform(
+        -spawn_radius, spawn_radius, size=(2,))
+    physics.named.data.qpos['ball_root'][2] = 2
+    physics.named.data.qvel['ball_root'][:2] = 5*self.random.randn(2)
+    super(Fetch, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation to the agent."""
+    obs = _common_observations(physics)
+    obs['ball_state'] = physics.ball_state()
+    obs['target_position'] = physics.target_position()
+    return obs
+
+  def get_reward(self, physics):
+    """Returns a reward to the agent."""
+
+    # Reward for moving close to the ball.
+    arena_radius = physics.named.model.geom_size['floor', 0] * np.sqrt(2)
+    workspace_radius = physics.named.model.site_size['workspace', 0]
+    ball_radius = physics.named.model.geom_size['ball', 0]
+    reach_reward = rewards.tolerance(
+        physics.self_to_ball_distance(),
+        bounds=(0, workspace_radius+ball_radius),
+        sigmoid='linear',
+        margin=arena_radius, value_at_margin=0)
+
+    # Reward for bringing the ball to the target.
+    target_radius = physics.named.model.site_size['target', 0]
+    fetch_reward = rewards.tolerance(
+        physics.ball_to_target_distance(),
+        bounds=(0, target_radius),
+        sigmoid='linear',
+        margin=arena_radius, value_at_margin=0)
+
+    reach_then_fetch = reach_reward * (0.5 + 0.5*fetch_reward)
+
+    return _upright_reward(physics) * reach_then_fetch
