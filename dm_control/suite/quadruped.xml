@@ -40,4 +40,15 @@
       </default>
       <default class="toe">
         <geom type="sphere" size=".08" material="effector" friction="1.5"/>
-        <site type="sphere" size=".084" material="site"  
+        <site type="sphere" size=".084" material="site"  group="4"/>
+      </default>
+    </default>
+    <default class="rangefinder">
+      <site type="capsule" size=".005 .1" material="site" group="4"/>
+    </default>
+    <default class="wall">
+      <geom type="plane" material="decoration"/>
+    </default>
+
+    <default class="coupling">
+      <equality solimp="0.95 0.99 0.01" solref=".005
