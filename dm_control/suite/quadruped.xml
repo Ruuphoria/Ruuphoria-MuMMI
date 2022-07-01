@@ -51,4 +51,14 @@
     </default>
 
     <default class="coupling">
-      <equality solimp="0.95 0.99 0.01" solref=".005
+      <equality solimp="0.95 0.99 0.01" solref=".005 .5"/>
+    </default>
+
+    <general ctrllimited="true" gainprm="1000" biasprm="0 -1000" biastype="affine" dyntype="filter" dynprm=".1"/>
+    <default class="yaw_act">
+      <general ctrlrange="-1 1"/>
+    </default>
+    <default class="lift_act">
+      <general ctrlrange="-1 1.1"/>
+    </default>
+    <de
