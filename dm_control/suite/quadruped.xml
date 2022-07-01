@@ -22,4 +22,14 @@
       <joint type="hinge" damping="30" armature=".01"
              limited="true" solimplimit="0 .99 .01"/>
       <default class="hip">
-        
+        <default class="yaw">
+          <joint axis="0 0 1" range="-50 50"/>
+        </default>
+        <default class="pitch">
+          <joint axis="0 1 0" range="-20 60"/>
+        </default>
+        <geom fromto="0 0 0 .3 0 .11"/>
+      </default>
+      <default class="knee">
+        <joint axis="0 1 0" range="-60 50"/>
+        <geom size=".065
