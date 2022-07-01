@@ -61,4 +61,16 @@
     <default class="lift_act">
       <general ctrlrange="-1 1.1"/>
     </default>
-    <de
+    <default class="extend_act">
+      <general ctrlrange="-.8 .8"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture name="ball" builtin="checker" mark="cross" width="151" height="151"
+             rgb1="0.1 0.1 0.1" rgb2="0.9 0.9 0.9" markrgb="1 1 1"/>
+    <material name="ball" texture="ball" />
+  </asset>
+
+
+  <worldb
