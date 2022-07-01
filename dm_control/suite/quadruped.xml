@@ -32,4 +32,12 @@
       </default>
       <default class="knee">
         <joint axis="0 1 0" range="-60 50"/>
-        <geom size=".065
+        <geom size=".065" fromto="0 0 0 .25 0 -.25"/>
+      </default>
+      <default class="ankle">
+        <joint axis="0 1 0" range="-45 55"/>
+        <geom size=".055" fromto="0 0 0 0 0 -.25"/>
+      </default>
+      <default class="toe">
+        <geom type="sphere" size=".08" material="effector" friction="1.5"/>
+        <site type="sphere" size=".084" material="site"  
