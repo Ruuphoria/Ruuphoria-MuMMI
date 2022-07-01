@@ -1,3 +1,16 @@
 <mujoco model="quadruped">
 
-  <i
+  <include file="./common/skybox.xml"/>
+  <include file="./common/visual.xml"/>
+  <include file="./common/materials.xml"/>
+
+  <visual>
+    <rgba rangefinder="1 1 0.1 0.1"/>
+    <map znear=".005" zfar="20"/>
+  </visual>
+
+  <asset>
+    <hfield name="terrain" ncol="201" nrow="201" size="30 30 5 .1"/>
+  </asset>
+
+  <option timestep
