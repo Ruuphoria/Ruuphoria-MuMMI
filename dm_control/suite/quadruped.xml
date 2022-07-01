@@ -13,4 +13,13 @@
     <hfield name="terrain" ncol="201" nrow="201" size="30 30 5 .1"/>
   </asset>
 
-  <option timestep
+  <option timestep=".005"/>
+
+  <default>
+    <geom solimp=".9 .99 .003" solref=".01 1"/>
+    <default class="body">
+      <geom  type="capsule" size=".08" condim="1" material="self" density="500"/>
+      <joint type="hinge" damping="30" armature=".01"
+             limited="true" solimplimit="0 .99 .01"/>
+      <default class="hip">
+        
