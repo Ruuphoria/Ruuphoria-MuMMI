@@ -102,4 +102,9 @@
       <site name="rf_01" class="rangefinder" fromto=".41 -.01  .11 .34 0 .115"/>
       <site name="rf_02" class="rangefinder" fromto=".41   0   .11 .34 0 .115"/>
       <site name="rf_03" class="rangefinder" fromto=".41  .01  .11 .34 0 .115"/>
-      <site name="rf_04" class="rangefinder" fromto=".41  .02  .11 .34 0 .115"
+      <site name="rf_04" class="rangefinder" fromto=".41  .02  .11 .34 0 .115"/>
+      <site name="rf_10" class="rangefinder" fromto=".41 -.02  .1  .36 0 .11"/>
+      <site name="rf_11" class="rangefinder" fromto=".41 -.02  .1  .36 0 .11"/>
+      <site name="rf_12" class="rangefinder" fromto=".41   0   .1  .36 0 .11"/>
+      <site name="rf_13" class="rangefinder" fromto=".41  .01  .1  .36 0 .11"/>
+      <site n
