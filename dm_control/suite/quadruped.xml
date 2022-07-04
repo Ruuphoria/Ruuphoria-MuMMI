@@ -120,4 +120,11 @@
       <site name="rf_34" class="rangefinder" fromto=".41  .02  .08 .4  0 .1"/>
 
       <geom name="torso" type="ellipsoid" size=".3 .27 .2" density="1000"/>
-      <site name="torso_touch" type="box" size=".26 .26 .26" 
+      <site name="torso_touch" type="box" size=".26 .26 .26" rgba="0 0 1 0"/>
+      <site name="torso" size=".05" rgba="1 0 0 1" />
+
+      <body name="hip_front_left" pos=".2 .2 0" euler="0 0 45" childclass="hip">
+        <joint name="yaw_front_left" class="yaw"/>
+        <joint name="pitch_front_left" class="pitch"/>
+        <geom name="thigh_front_left"/>
+        <body na
