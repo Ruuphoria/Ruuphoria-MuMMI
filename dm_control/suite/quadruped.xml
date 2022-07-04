@@ -127,4 +127,10 @@
         <joint name="yaw_front_left" class="yaw"/>
         <joint name="pitch_front_left" class="pitch"/>
         <geom name="thigh_front_left"/>
-        <body na
+        <body name="knee_front_left" pos=".3 0 .11" childclass="knee">
+          <joint name="knee_front_left"/>
+          <geom name="shin_front_left"/>
+          <body name="ankle_front_left" pos=".25 0 -.25" childclass="ankle">
+            <joint name="ankle_front_left"/>
+            <geom name="foot_front_left"/>
+            <body name="to
