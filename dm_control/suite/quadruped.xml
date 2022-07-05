@@ -133,4 +133,13 @@
           <body name="ankle_front_left" pos=".25 0 -.25" childclass="ankle">
             <joint name="ankle_front_left"/>
             <geom name="foot_front_left"/>
-            <body name="to
+            <body name="toe_front_left" pos="0 0 -.3" childclass="toe">
+              <geom name="toe_front_left"/>
+              <site name="toe_front_left"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="hip_front_right" pos=".2 -.2 0" euler="0 0 -45" childclass="hip">
+        <joint name="yaw_fro
