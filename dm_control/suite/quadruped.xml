@@ -155,4 +155,12 @@
               <geom name="toe_front_right"/>
               <site name="toe_front_right"/>
             </body>
-          </bod
+          </body>
+        </body>
+      </body>
+
+      <body name="hip_back_right" pos="-.2 -.2 0" euler="0 0 -135" childclass="hip">
+        <joint name="yaw_back_right" class="yaw"/>
+        <joint name="pitch_back_right" class="pitch"/>
+        <geom name="thigh_back_right"/>
+        <body name="knee_back_right" pos=".3 0 .11
