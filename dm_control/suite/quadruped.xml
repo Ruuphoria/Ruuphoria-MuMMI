@@ -142,4 +142,10 @@
       </body>
 
       <body name="hip_front_right" pos=".2 -.2 0" euler="0 0 -45" childclass="hip">
-        <joint name="yaw_fro
+        <joint name="yaw_front_right" class="yaw"/>
+        <joint name="pitch_front_right" class="pitch"/>
+        <geom name="thigh_front_right"/>
+        <body name="knee_front_right" pos=".3 0 .11" childclass="knee">
+          <joint name="knee_front_right"/>
+          <geom name="shin_front_right"/>
+          <body name="ankle_front_rig
