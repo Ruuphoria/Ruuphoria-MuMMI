@@ -163,4 +163,10 @@
         <joint name="yaw_back_right" class="yaw"/>
         <joint name="pitch_back_right" class="pitch"/>
         <geom name="thigh_back_right"/>
-        <body name="knee_back_right" pos=".3 0 .11
+        <body name="knee_back_right" pos=".3 0 .11" childclass="knee">
+          <joint name="knee_back_right"/>
+          <geom name="shin_back_right"/>
+          <body name="ankle_back_right" pos=".25 0 -.25" childclass="ankle">
+            <joint name="ankle_back_right"/>
+            <geom name="foot_back_right"/>
+            <body name="toe_back_right" pos="0 0 -.3" child
