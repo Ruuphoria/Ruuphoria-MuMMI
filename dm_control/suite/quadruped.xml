@@ -169,4 +169,14 @@
           <body name="ankle_back_right" pos=".25 0 -.25" childclass="ankle">
             <joint name="ankle_back_right"/>
             <geom name="foot_back_right"/>
-            <body name="toe_back_right" pos="0 0 -.3" child
+            <body name="toe_back_right" pos="0 0 -.3" childclass="toe">
+              <geom name="toe_back_right"/>
+              <site name="toe_back_right"/>
+            </body>
+          </body>
+        </body>
+      </body>
+
+      <body name="hip_back_left" pos="-.2 .2 0" euler="0 0 135" childclass="hip">
+        <joint name="yaw_back_left" class="yaw"/>
+        <joi
