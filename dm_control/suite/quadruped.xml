@@ -148,4 +148,11 @@
         <body name="knee_front_right" pos=".3 0 .11" childclass="knee">
           <joint name="knee_front_right"/>
           <geom name="shin_front_right"/>
-          <body name="ankle_front_rig
+          <body name="ankle_front_right" pos=".25 0 -.25" childclass="ankle">
+            <joint name="ankle_front_right"/>
+            <geom name="foot_front_right"/>
+            <body name="toe_front_right" pos="0 0 -.3" childclass="toe">
+              <geom name="toe_front_right"/>
+              <site name="toe_front_right"/>
+            </body>
+          </bod
