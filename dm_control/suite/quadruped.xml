@@ -179,4 +179,9 @@
 
       <body name="hip_back_left" pos="-.2 .2 0" euler="0 0 135" childclass="hip">
         <joint name="yaw_back_left" class="yaw"/>
-        <joi
+        <joint name="pitch_back_left" class="pitch"/>
+        <geom name="thigh_back_left"/>
+        <body name="knee_back_left" pos=".3 0 .11" childclass="knee">
+          <joint name="knee_back_left"/>
+          <geom name="shin_back_left"/>
+          <body name="ankle_back_left" pos=".25 0 -.25" childclass="an
