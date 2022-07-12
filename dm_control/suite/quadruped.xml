@@ -206,4 +206,11 @@
   </worldbody>
 
   <tendon>
-    <fixed name=
+    <fixed name="coupling_front_left">
+      <joint joint="pitch_front_left"      coef=".333"/>
+      <joint joint="knee_front_left"       coef=".333"/>
+      <joint joint="ankle_front_left"      coef=".333"/>
+    </fixed>
+    <fixed name="coupling_front_right">
+      <joint joint="pitch_front_right"      coef=".333"/>
+      <joint join
