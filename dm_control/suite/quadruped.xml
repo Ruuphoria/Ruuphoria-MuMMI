@@ -213,4 +213,11 @@
     </fixed>
     <fixed name="coupling_front_right">
       <joint joint="pitch_front_right"      coef=".333"/>
-      <joint join
+      <joint joint="knee_front_right"       coef=".333"/>
+      <joint joint="ankle_front_right"      coef=".333"/>
+    </fixed>
+    <fixed name="coupling_back_right">
+      <joint joint="pitch_back_right"      coef=".333"/>
+      <joint joint="knee_back_right"       coef=".333"/>
+      <joint joint="ankle_back_right"      coef=".333"/>
+    </fix
