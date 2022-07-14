@@ -263,4 +263,12 @@
       <joint joint="ankle_back_left"      coef=".25"/>
     </fixed>
     <fixed name="lift_back_left">
-      <joint joint="pitch_bac
+      <joint joint="pitch_back_left"     coef=".5"/>
+      <joint joint="ankle_back_left"     coef="-.5"/>
+    </fixed>
+  </tendon>
+
+  <equality>
+    <tendon name="coupling_front_left" tendon1="coupling_front_left" class="coupling"/>
+    <tendon name="coupling_front_right" tendon1="coupling_front_right" class="coupling"/>
+    <tendon name=
