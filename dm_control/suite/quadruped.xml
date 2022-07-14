@@ -237,4 +237,12 @@
       <joint joint="ankle_front_left"      coef="-.5"/>
     </fixed>
 
-    <fixed name="ex
+    <fixed name="extend_front_right">
+      <joint joint="pitch_front_right"     coef=".25"/>
+      <joint joint="knee_front_right"      coef="-.5"/>
+      <joint joint="ankle_front_right"     coef=".25"/>
+    </fixed>
+    <fixed name="lift_front_right">
+      <joint joint="pitch_front_right"     coef=".5"/>
+      <joint joint="ankle_front_right"     coef="-.5"/>
+    </
