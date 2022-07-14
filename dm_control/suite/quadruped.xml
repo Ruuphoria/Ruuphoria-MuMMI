@@ -271,4 +271,11 @@
   <equality>
     <tendon name="coupling_front_left" tendon1="coupling_front_left" class="coupling"/>
     <tendon name="coupling_front_right" tendon1="coupling_front_right" class="coupling"/>
-    <tendon name=
+    <tendon name="coupling_back_right" tendon1="coupling_back_right" class="coupling"/>
+    <tendon name="coupling_back_left" tendon1="coupling_back_left" class="coupling"/>
+  </equality>
+
+  <actuator>
+    <general name="yaw_front_left" class="yaw_act" joint="yaw_front_left"/>
+    <general name="lift_front_left" class="lift_act" tendon="lift_front_left"/>
+    <general name="e
