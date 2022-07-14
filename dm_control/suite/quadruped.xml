@@ -278,4 +278,8 @@
   <actuator>
     <general name="yaw_front_left" class="yaw_act" joint="yaw_front_left"/>
     <general name="lift_front_left" class="lift_act" tendon="lift_front_left"/>
-    <general name="e
+    <general name="extend_front_left" class="extend_act" tendon="extend_front_left"/>
+    <general name="yaw_front_right" class="yaw_act" joint="yaw_front_right"/>
+    <general name="lift_front_right" class="lift_act" tendon="lift_front_right"/>
+    <general name="extend_front_right" class="extend_act" tendon="extend_front_right"/>
+    <general name="yaw
