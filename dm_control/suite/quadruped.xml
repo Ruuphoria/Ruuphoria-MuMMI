@@ -286,4 +286,12 @@
     <general name="lift_back_right" class="lift_act" tendon="lift_back_right"/>
     <general name="extend_back_right" class="extend_act" tendon="extend_back_right"/>
     <general name="yaw_back_left" class="yaw_act" joint="yaw_back_left"/>
-    <general name="lift_back_left" class="lif
+    <general name="lift_back_left" class="lift_act" tendon="lift_back_left"/>
+    <general name="extend_back_left" class="extend_act" tendon="extend_back_left"/>
+  </actuator>
+
+  <sensor>
+  	<accelerometer name="imu_accel" site="torso"/>
+    <gyro name="imu_gyro" site="torso"/>
+    <velocimeter name="velocimeter" site="torso"/>
+    <force name="force_toe_front_left" site="to
