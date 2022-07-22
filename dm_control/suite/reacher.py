@@ -23,4 +23,17 @@ import collections
 
 from dm_control import mujoco
 from dm_control.rl import control
-f
+from dm_control.suite import base
+from dm_control.suite import common
+from dm_control.suite.utils import randomizers
+from dm_control.utils import containers
+from dm_control.utils import rewards
+import numpy as np
+
+SUITE = containers.TaggedTasks()
+_DEFAULT_TIME_LIMIT = 20
+_BIG_TARGET = .05
+_SMALL_TARGET = .015
+
+
+def g
