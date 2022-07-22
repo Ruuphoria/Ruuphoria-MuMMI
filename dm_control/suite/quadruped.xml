@@ -299,4 +299,10 @@
     <force name="force_toe_back_right" site="toe_back_right"/>
     <force name="force_toe_back_left" site="toe_back_left"/>
     <torque name="torque_toe_front_left" site="toe_front_left"/>
-    <torque name="torque_toe_front_ri
+    <torque name="torque_toe_front_right" site="toe_front_right"/>
+    <torque name="torque_toe_back_right" site="toe_back_right"/>
+    <torque name="torque_toe_back_left" site="toe_back_left"/>
+    <subtreecom name="center_of_mass" body="torso"/>
+    <rangefinder name="rf_00" site="rf_00"/>
+    <rangefinder name="rf_01" site="rf_01"/>
+    <rangefinder name="rf_02"
