@@ -9,4 +9,18 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or  implied.
-# See the License for the specific language governing permissions a
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+
+"""Reacher domain."""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import collections
+
+from dm_control import mujoco
+from dm_control.rl import control
+f
