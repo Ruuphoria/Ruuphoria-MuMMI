@@ -320,4 +320,10 @@
     <rangefinder name="rf_24" site="rf_24"/>
     <rangefinder name="rf_30" site="rf_30"/>
     <rangefinder name="rf_31" site="rf_31"/>
-    <rangefinder name="rf_32" site="rf
+    <rangefinder name="rf_32" site="rf_32"/>
+    <rangefinder name="rf_33" site="rf_33"/>
+    <rangefinder name="rf_34" site="rf_34"/>
+    <touch name="toe_front_left_sensor" site="toe_front_left"/>
+    <touch name="toe_front_right_sensor" site="toe_front_right"/>
+    <touch name="toe_back_left_sensor" site="toe_back_left"/>
+    <touch name="toe_bac
