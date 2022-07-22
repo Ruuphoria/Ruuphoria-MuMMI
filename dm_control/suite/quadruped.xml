@@ -326,4 +326,8 @@
     <touch name="toe_front_left_sensor" site="toe_front_left"/>
     <touch name="toe_front_right_sensor" site="toe_front_right"/>
     <touch name="toe_back_left_sensor" site="toe_back_left"/>
-    <touch name="toe_bac
+    <touch name="toe_back_right_sensor" site="toe_back_right"/>
+  </sensor>
+
+</mujoco>
+
