@@ -294,4 +294,9 @@
   	<accelerometer name="imu_accel" site="torso"/>
     <gyro name="imu_gyro" site="torso"/>
     <velocimeter name="velocimeter" site="torso"/>
-    <force name="force_toe_front_left" site="to
+    <force name="force_toe_front_left" site="toe_front_left"/>
+    <force name="force_toe_front_right" site="toe_front_right"/>
+    <force name="force_toe_back_right" site="toe_back_right"/>
+    <force name="force_toe_back_left" site="toe_back_left"/>
+    <torque name="torque_toe_front_left" site="toe_front_left"/>
+    <torque name="torque_toe_front_ri
