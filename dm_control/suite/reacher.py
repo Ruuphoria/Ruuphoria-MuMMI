@@ -48,4 +48,11 @@ def easy(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
   task = Reacher(target_size=_BIG_TARGET, random=random)
   environment_kwargs = environment_kwargs or {}
   return control.Environment(
-      physics, task, time_limit=time_limit, **environment_kwarg
+      physics, task, time_limit=time_limit, **environment_kwargs)
+
+
+@SUITE.add('benchmarking')
+def hard(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
+  """Returns reacher with sparse reward with 1e-2 tol and randomized target."""
+  physics = Physics.from_xml_string(*get_model_and_assets())
+  task = Reacher(target_size=_SMALL_TARGET, random=random
