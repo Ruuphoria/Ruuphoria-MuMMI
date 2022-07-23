@@ -36,4 +36,11 @@ _BIG_TARGET = .05
 _SMALL_TARGET = .015
 
 
-def g
+def get_model_and_assets():
+  """Returns a tuple containing the model XML string and a dict of assets."""
+  return common.read_model('reacher.xml'), common.ASSETS
+
+
+@SUITE.add('benchmarking', 'easy')
+def easy(time_limit=_DEFAULT_TIME_LIMIT, random=None, environment_kwargs=None):
+  """Returns reacher with sparse
