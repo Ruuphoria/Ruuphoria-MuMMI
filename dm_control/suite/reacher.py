@@ -65,4 +65,14 @@ class Physics(mujoco.Physics):
   """Physics simulation with additional features for the Reacher domain."""
 
   def finger_to_target(self):
-    """Returns the vector from target to finger in global coordin
+    """Returns the vector from target to finger in global coordinates."""
+    return (self.named.data.geom_xpos['target', :2] -
+            self.named.data.geom_xpos['finger', :2])
+
+  def finger_to_target_dist(self):
+    """Returns the signed distance between the finger and target surface."""
+    return np.linalg.norm(self.finger_to_target())
+
+
+class Reacher(base.Task):
+  """A r
