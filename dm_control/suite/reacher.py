@@ -75,4 +75,13 @@ class Physics(mujoco.Physics):
 
 
 class Reacher(base.Task):
-  """A r
+  """A reacher `Task` to reach the target."""
+
+  def __init__(self, target_size, random=None):
+    """Initialize an instance of `Reacher`.
+
+    Args:
+      target_size: A `float`, tolerance to determine whether finger reached the
+          target.
+      random: Optional, either a `numpy.random.RandomState` instance, an
+       
