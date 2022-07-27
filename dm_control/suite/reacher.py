@@ -84,4 +84,11 @@ class Reacher(base.Task):
       target_size: A `float`, tolerance to determine whether finger reached the
           target.
       random: Optional, either a `numpy.random.RandomState` instance, an
-       
+        integer seed for creating a new `RandomState`, or None to select a seed
+        automatically (default).
+    """
+    self._target_size = target_size
+    super(Reacher, self).__init__(random=random)
+
+  def initialize_episode(self, physics):
+    """Sets the state of the environment at the start of
