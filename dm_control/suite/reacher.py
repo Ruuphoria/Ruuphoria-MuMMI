@@ -91,4 +91,11 @@ class Reacher(base.Task):
     super(Reacher, self).__init__(random=random)
 
   def initialize_episode(self, physics):
-    """Sets the state of the environment at the start of
+    """Sets the state of the environment at the start of each episode."""
+    physics.named.model.geom_size['target', 0] = self._target_size
+    randomizers.randomize_limited_and_rotational_joints(physics, self.random)
+
+    # Randomize target position
+    angle = self.random.uniform(0, 2 * np.pi)
+    radius = self.random.uniform(.05, .20)
+    phy
