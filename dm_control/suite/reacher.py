@@ -98,4 +98,11 @@ class Reacher(base.Task):
     # Randomize target position
     angle = self.random.uniform(0, 2 * np.pi)
     radius = self.random.uniform(.05, .20)
-    phy
+    physics.named.model.geom_pos['target', 'x'] = radius * np.sin(angle)
+    physics.named.model.geom_pos['target', 'y'] = radius * np.cos(angle)
+
+    super(Reacher, self).initialize_episode(physics)
+
+  def get_observation(self, physics):
+    """Returns an observation of the state and the target position."""
+ 
