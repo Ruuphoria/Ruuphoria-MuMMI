@@ -113,4 +113,4 @@ class Reacher(base.Task):
 
   def get_reward(self, physics):
     radii = physics.named.model.geom_size[['target', 'finger'], 0].sum()
-    return rewards.tolerance(physics.finger_
+    return rewards.tolerance(physics.finger_to_target_dist(), (0, radii))
