@@ -186,3 +186,113 @@ class SuiteTest(parameterized.TestCase):
       self.assertEqual(time_step1.step_type, time_step2.step_type)
       self.assertEqual(time_step1.reward, time_step2.reward)
       self.assertEqual(time_step1.discount, time_step2.discount)
+      for key in six.iterkeys(time_step1.observation):
+        np.testing.assert_array_equal(
+            time_step1.observation[key], time_step2.observation[key],
+            err_msg='Observation {!r} is not equal.'.format(key))
+
+  def assertCorrectColors(self, physics, reward):
+    colors = physics.named.model.mat_rgba
+    for material_name in ('self', 'effector', 'target'):
+      highlight = colors[material_name + '_highlight']
+      default = colors[material_name + '_default']
+      blend_coef = reward ** 4
+      expected = blend_coef * highlight + (1.0 - blend_coef) * default
+      actual = colors[material_name]
+      err_msg = ('Material {!r} has unexpected color.\nExpected: {!r}\n'
+                 'Actual: {!r}'.format(material_name, expected, actual))
+      np.testing.assert_array_almost_equal(expected, actual, err_msg=err_msg)
+
+  @parameterized.parameters(*suite.REWARD_VIZ)
+  def test_visualize_reward(self, domain, task):
+    env = suite.load(domain, task)
+    env.task.visualize_reward = True
+    action = np.zeros(env.action_spec().shape)
+
+    with mock.patch.object(env.task, 'get_reward') as mock_get_reward:
+      mock_get_reward.return_value = -3.0  # Rewards < 0 should be clipped.
+      env.reset()
+      mock_get_reward.assert_called_with(env.physics)
+      self.assertCorrectColors(env.physics, reward=0.0)
+
+      mock_get_reward.reset_mock()
+      mock_get_reward.return_value = 0.5
+      env.step(action)
+      mock_get_reward.assert_called_with(env.physics)
+      self.assertCorrectColors(env.physics, reward=mock_get_reward.return_value)
+
+      mock_get_reward.reset_mock()
+      mock_get_reward.return_value = 2.0  # Rewards > 1 should be clipped.
+      env.step(action)
+      mock_get_reward.assert_called_with(env.physics)
+      self.assertCorrectColors(env.physics, reward=1.0)
+
+      mock_get_reward.reset_mock()
+      mock_get_reward.return_value = 0.25
+      env.reset()
+      mock_get_reward.assert_called_with(env.physics)
+      self.assertCorrectColors(env.physics, reward=mock_get_reward.return_value)
+
+  @parameterized.parameters(_DOMAINS_AND_TASKS)
+  def test_task_supports_environment_kwargs(self, domain, task):
+    env = suite.load(domain, task,
+                     environment_kwargs=dict(flat_observation=True))
+    # Check that the kwargs are actually passed through to the environment.
+    self.assertSetEqual(set(env.observation_spec()),
+                        {control.FLAT_OBSERVATION_KEY})
+
+  @parameterized.parameters(_DOMAINS_AND_TASKS)
+  def test_observation_arrays_dont_share_memory(self, domain, task):
+    env = suite.load(domain, task)
+    first_timestep = env.reset()
+    action = np.zeros(env.action_spec().shape)
+    second_timestep = env.step(action)
+    for name, first_array in six.iteritems(first_timestep.observation):
+      second_array = second_timestep.observation[name]
+      self.assertFalse(
+          np.may_share_memory(first_array, second_array),
+          msg='Consecutive observations of {!r} may share memory.'.format(name))
+
+  @parameterized.parameters(_DOMAINS_AND_TASKS)
+  def test_observations_dont_contain_constant_elements(self, domain, task):
+    env = suite.load(domain, task)
+    trajectory = make_trajectory(domain=domain, task=task, seed=0,
+                                 num_episodes=2, max_steps_per_episode=1000)
+    observations = {name: [] for name in env.observation_spec()}
+    for time_step in trajectory:
+      for name, array in six.iteritems(time_step.observation):
+        observations[name].append(array)
+
+    failures = []
+
+    for name, array_list in six.iteritems(observations):
+      # Sampling random uniform actions generally isn't sufficient to trigger
+      # these touch sensors.
+      if (domain in ('manipulator', 'stacker') and name == 'touch' or
+          domain == 'quadruped' and name == 'force_torque'):
+        continue
+      stacked_arrays = np.array(array_list)
+      is_constant = np.all(stacked_arrays == stacked_arrays[0], axis=0)
+      has_constant_elements = (
+          is_constant if np.isscalar(is_constant) else np.any(is_constant))
+      if has_constant_elements:
+        failures.append((name, is_constant))
+
+    self.assertEmpty(
+        failures,
+        msg='The following observation(s) contain constant elements:\n{}'
+        .format('\n'.join(':\t'.join([name, str(is_constant)])
+                          for (name, is_constant) in failures)))
+
+  @parameterized.parameters(_DOMAINS_AND_TASKS)
+  def test_initial_state_is_randomized(self, domain, task):
+    env = suite.load(domain, task, task_kwargs={'random': 42})
+    obs1 = env.reset().observation
+    obs2 = env.reset().observation
+    self.assertFalse(
+        all(np.all(obs1[k] == obs2[k]) for k in obs1),
+        'Two consecutive initial states have identical observations.\n'
+        'First: {}\nSecond: {}'.format(obs1, obs2))
+
+if __name__ == '__main__':
+  absltest.main()
