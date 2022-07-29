@@ -105,4 +105,12 @@ class Reacher(base.Task):
 
   def get_observation(self, physics):
     """Returns an observation of the state and the target position."""
- 
+    obs = collections.OrderedDict()
+    obs['position'] = physics.position()
+    obs['to_target'] = physics.finger_to_target()
+    obs['velocity'] = physics.velocity()
+    return obs
+
+  def get_reward(self, physics):
+    radii = physics.named.model.geom_size[['target', 'finger'], 0].sum()
+    return rewards.tolerance(physics.finger_
