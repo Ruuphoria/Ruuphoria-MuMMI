@@ -36,4 +36,10 @@ def random_limited_quaternion(random, limit):
   return quaternion
 
 
-def 
+def randomize_limited_and_rotational_joints(physics, random=None):
+  """Randomizes the positions of joints defined in the physics body.
+
+  The following randomization rules apply:
+    - Bounded joints (hinges or sliders) are sampled uniformly in the bounds.
+    - Unbounded hinges are samples uniformly in [-pi, pi]
+    - Quaternions for unlimited free joi
