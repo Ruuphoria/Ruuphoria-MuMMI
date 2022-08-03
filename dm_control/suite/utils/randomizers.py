@@ -24,4 +24,16 @@ import numpy as np
 from six.moves import range
 
 
-def ra
+def random_limited_quaternion(random, limit):
+  """Generates a random quaternion limited to the specified rotations."""
+  axis = random.randn(3)
+  axis /= np.linalg.norm(axis)
+  angle = random.rand() * limit
+
+  quaternion = np.zeros(4)
+  mjbindings.mjlib.mju_axisAngle2Quat(quaternion, axis, angle)
+
+  return quaternion
+
+
+def 
