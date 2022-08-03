@@ -49,4 +49,13 @@ def randomize_limited_and_rotational_joints(physics, random=None):
     - The linear degrees of freedom of free joints are not randomized.
 
   Args:
-    physics: Instance of 'Physics' class that holds a 
+    physics: Instance of 'Physics' class that holds a loaded model.
+    random: Optional instance of 'np.random.RandomState'. Defaults to the global
+      NumPy random state.
+  """
+  random = random or np.random
+
+  hinge = mjbindings.enums.mjtJoint.mjJNT_HINGE
+  slide = mjbindings.enums.mjtJoint.mjJNT_SLIDE
+  ball = mjbindings.enums.mjtJoint.mjJNT_BALL
+  free =
