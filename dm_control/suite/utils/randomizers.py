@@ -58,4 +58,12 @@ def randomize_limited_and_rotational_joints(physics, random=None):
   hinge = mjbindings.enums.mjtJoint.mjJNT_HINGE
   slide = mjbindings.enums.mjtJoint.mjJNT_SLIDE
   ball = mjbindings.enums.mjtJoint.mjJNT_BALL
-  free =
+  free = mjbindings.enums.mjtJoint.mjJNT_FREE
+
+  qpos = physics.named.data.qpos
+
+  for joint_id in range(physics.model.njnt):
+    joint_name = physics.model.id2name(joint_id, 'joint')
+    joint_type = physics.model.jnt_type[joint_id]
+    is_limited = physics.model.jnt_limited[joint_id]
+    range_min, range_max = physics.model.jnt_range[joint_id]
