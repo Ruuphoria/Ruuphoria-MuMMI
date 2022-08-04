@@ -67,3 +67,14 @@ def randomize_limited_and_rotational_joints(physics, random=None):
     joint_type = physics.model.jnt_type[joint_id]
     is_limited = physics.model.jnt_limited[joint_id]
     range_min, range_max = physics.model.jnt_range[joint_id]
+
+    if is_limited:
+      if joint_type == hinge or joint_type == slide:
+        qpos[joint_name] = random.uniform(range_min, range_max)
+
+      elif joint_type == ball:
+        qpos[joint_name] = random_limited_quaternion(random, range_max)
+
+    else:
+      if joint_type == hinge:
+        qpos[joint_name] = random.un
