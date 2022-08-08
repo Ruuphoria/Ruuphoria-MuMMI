@@ -16,6 +16,7 @@
     <default class="walker">
       <geom material="self" type="capsule"/>
       <joint axis="0 -1 0"/>
+      <site type="ellipsoid" material="site" group="3"/>
     </default>
   </default>
 
@@ -38,6 +39,7 @@
           <body name="right_foot" pos="0.06 0 -0.25">
             <joint name="right_ankle" pos="-0.06 0 0" range="-45 45"/>
             <geom name="right_foot" zaxis="1 0 0" size="0.05 0.1"/>
+            <site name="right_foot_touch" pos="0.01 0.00 -0.06" size=".15 .05 .02" type="ellipsoid"/>
           </body>
         </body>
       </body>
@@ -50,6 +52,7 @@
           <body name="left_foot" pos="0.06 0 -0.25">
             <joint name="left_ankle" pos="-0.06 0 0" range="-45 45"/>
             <geom name="left_foot" zaxis="1 0 0" size="0.05 0.1"/>
+            <site name="left_foot_touch" pos="0.01 0.00 -0.06" size=".15 .05 .02" type="ellipsoid"/>
           </body>
         </body>
       </body>
@@ -58,6 +61,8 @@
 
   <sensor>
     <subtreelinvel name="torso_subtreelinvel" body="torso"/>
+    <touch name="right_foot_sensor" site="right_foot_touch"/>
+    <touch name="left_foot_sensor" site="left_foot_touch"/>
   </sensor>
 
   <actuator>
