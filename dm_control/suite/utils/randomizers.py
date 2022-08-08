@@ -77,4 +77,15 @@ def randomize_limited_and_rotational_joints(physics, random=None):
 
     else:
       if joint_type == hinge:
-        qpos[joint_name] = random.un
+        qpos[joint_name] = random.uniform(-np.pi, np.pi)
+
+      elif joint_type == ball:
+        quat = random.randn(4)
+        quat /= np.linalg.norm(quat)
+        qpos[joint_name] = quat
+
+      elif joint_type == free:
+        quat = random.rand(4)
+        quat /= np.linalg.norm(quat)
+        qpos[joint_name][3:] = quat
+
