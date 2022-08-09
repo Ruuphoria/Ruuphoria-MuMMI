@@ -13,4 +13,4 @@
 # limitations under the License.
 # ============================================================================
 
-"""Environment wrappers used to extend or modify env
+"""Environment wrappers used to extend or modify environment behaviour."""
