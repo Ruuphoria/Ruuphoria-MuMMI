@@ -99,3 +99,15 @@ class Wrapper(dm_env.Environment):
     else:
       observation = collections.OrderedDict()
       observation[STATE_KEY] = time_step.observation
+
+    # timer[0] is the step timer. There are lots of different timers (see
+    # mujoco/hdrs/mjdata.h)
+    # but we only care about the step timer.
+    timing = self._env.physics.data.timer[0]
+
+    observation[self._observation_key] = np.array([timing[0], timing[1]],
+                                                  dtype=np.double)
+    return time_step._replace(observation=observation)
+
+  def __getattr__(self, name):
+    return getattr(self._env, name)
