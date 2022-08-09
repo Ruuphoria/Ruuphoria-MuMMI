@@ -69,3 +69,40 @@ class Wrapper(dm_env.Environment):
     def validate(bounds, name):
       if not np.all(np.isfinite(bounds)):
         raise ValueError(_MUST_BE_FINITE.format(name=name, bounds=bounds))
+      try:
+        np.broadcast_to(bounds, shape)
+      except ValueError:
+        raise ValueError(_MUST_BROADCAST.format(
+            name=name, bounds=bounds, shape=shape))
+
+    validate(minimum, "minimum")
+    validate(maximum, "maximum")
+    validate(orig_minimum, "env.action_spec().minimum")
+    validate(orig_maximum, "env.action_spec().maximum")
+
+    scale = (orig_maximum - orig_minimum) / (maximum - minimum)
+
+    def transform(action):
+      new_action = orig_minimum + scale * (action - minimum)
+      return new_action.astype(orig_dtype, copy=False)
+
+    dtype = np.result_type(minimum, maximum, orig_dtype)
+    self._action_spec = action_spec.replace(
+        minimum=minimum, maximum=maximum, dtype=dtype)
+    self._env = env
+    self._transform = transform
+
+  def step(self, action):
+    return self._env.step(self._transform(action))
+
+  def reset(self):
+    return self._env.reset()
+
+  def observation_spec(self):
+    return self._env.observation_spec()
+
+  def action_spec(self):
+    return self._action_spec
+
+  def __getattr__(self, name):
+    return getattr(self._env, name)
