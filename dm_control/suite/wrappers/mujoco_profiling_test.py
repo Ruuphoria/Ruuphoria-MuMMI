@@ -23,4 +23,18 @@ import collections
 # Internal dependencies.
 from absl.testing import absltest
 from dm_control.suite import cartpole
-from dm_control.suite.wrappers imp
+from dm_control.suite.wrappers import mujoco_profiling
+
+import numpy as np
+
+
+class MujocoProfilingTest(absltest.TestCase):
+
+  def test_dict_observation(self):
+    obs_key = 'mjprofile'
+
+    env = cartpole.swingup()
+
+    # Make sure we are testing the right environment for the test.
+    observation_spec = env.observation_spec()
+    sel
