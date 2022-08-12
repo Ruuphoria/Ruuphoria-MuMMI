@@ -51,4 +51,13 @@ class MujocoProfilingTest(absltest.TestCase):
     self.assertEqual(expected_keys, list(wrapped_observation_spec.keys()))
 
     # Check that the added spec item is consistent with the added observation.
-    time_step =
+    time_step = wrapped.reset()
+    profile_observation = time_step.observation[obs_key]
+    wrapped_observation_spec[obs_key].validate(profile_observation)
+
+    self.assertEqual(profile_observation.shape, (2,))
+    self.assertEqual(profile_observation.dtype, np.double)
+
+
+if __name__ == '__main__':
+  absltest.main()
