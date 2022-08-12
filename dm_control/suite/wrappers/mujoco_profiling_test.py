@@ -45,4 +45,10 @@ class MujocoProfilingTest(absltest.TestCase):
     wrapped_observation_spec = wrapped.observation_spec()
     self.assertIsInstance(wrapped_observation_spec, collections.OrderedDict)
 
-    expected_length = len(obse
+    expected_length = len(observation_spec) + 1
+    self.assertLen(wrapped_observation_spec, expected_length)
+    expected_keys = list(observation_spec.keys()) + [obs_key]
+    self.assertEqual(expected_keys, list(wrapped_observation_spec.keys()))
+
+    # Check that the added spec item is consistent with the added observation.
+    time_step =
