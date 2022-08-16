@@ -27,4 +27,13 @@ from dm_env import specs
 STATE_KEY = 'state'
 
 
-class Wrapper(
+class Wrapper(dm_env.Environment):
+  """Wraps a control environment and adds a rendered pixel observation."""
+
+  def __init__(self, env, pixels_only=True, render_kwargs=None,
+               observation_key='pixels'):
+    """Initializes a new pixel Wrapper.
+
+    Args:
+      env: The environment to wrap.
+      pixels_only: If True (default), the original set 
