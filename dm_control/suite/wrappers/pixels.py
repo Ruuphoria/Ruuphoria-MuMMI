@@ -47,4 +47,14 @@ class Wrapper(dm_env.Environment):
         key in the `OrderedDict` of observations. Defaults to 'pixels'.
 
     Raises:
-      ValueError: If `env`'s observation spec is not compatible with th
+      ValueError: If `env`'s observation spec is not compatible with the
+        wrapper. Supported formats are a single array, or a dict of arrays.
+      ValueError: If `env`'s observation already contains the specified
+        `observation_key`.
+    """
+    if render_kwargs is None:
+      render_kwargs = {}
+
+    wrapped_observation_spec = env.observation_spec()
+
+    if isinstanc
