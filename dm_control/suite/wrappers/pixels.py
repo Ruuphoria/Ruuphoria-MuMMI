@@ -36,4 +36,9 @@ class Wrapper(dm_env.Environment):
 
     Args:
       env: The environment to wrap.
-      pixels_only: If True (default), the original set 
+      pixels_only: If True (default), the original set of 'state' observations
+        returned by the wrapped environment will be discarded, and the
+        `OrderedDict` of observations will only contain pixels. If False, the
+        `OrderedDict` will contain the original observations as well as the
+        pixel observations.
+      render_kwargs: Optional `dict` cont
