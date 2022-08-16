@@ -41,4 +41,10 @@ class Wrapper(dm_env.Environment):
         `OrderedDict` of observations will only contain pixels. If False, the
         `OrderedDict` will contain the original observations as well as the
         pixel observations.
-      render_kwargs: Optional `dict` cont
+      render_kwargs: Optional `dict` containing keyword arguments passed to the
+        `mujoco.Physics.render` method.
+      observation_key: Optional custom string specifying the pixel observation's
+        key in the `OrderedDict` of observations. Defaults to 'pixels'.
+
+    Raises:
+      ValueError: If `env`'s observation spec is not compatible with th
