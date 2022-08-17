@@ -64,4 +64,11 @@ class Wrapper(dm_env.Environment):
       self._observation_is_dict = True
       invalid_keys = set(wrapped_observation_spec.keys())
     else:
-      rai
+      raise ValueError('Unsupported observation spec structure.')
+
+    if not pixels_only and observation_key in invalid_keys:
+      raise ValueError('Duplicate or reserved observation key {!r}.'
+                       .format(observation_key))
+
+    if pixels_only:
+      self._observati
