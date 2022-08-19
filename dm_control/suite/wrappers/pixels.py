@@ -79,4 +79,12 @@ class Wrapper(dm_env.Environment):
       self._observation_spec[STATE_KEY] = wrapped_observation_spec
 
     # Extend observation spec.
-    pixels = env.physics.r
+    pixels = env.physics.render(**render_kwargs)
+    pixels_spec = specs.Array(
+        shape=pixels.shape, dtype=pixels.dtype, name=observation_key)
+    self._observation_spec[observation_key] = pixels_spec
+
+    self._env = env
+    self._pixels_only = pixels_only
+    self._render_kwargs = render_kwargs
+    self._o
