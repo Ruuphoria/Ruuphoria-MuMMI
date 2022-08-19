@@ -71,4 +71,12 @@ class Wrapper(dm_env.Environment):
                        .format(observation_key))
 
     if pixels_only:
-      self._observati
+      self._observation_spec = collections.OrderedDict()
+    elif self._observation_is_dict:
+      self._observation_spec = wrapped_observation_spec.copy()
+    else:
+      self._observation_spec = collections.OrderedDict()
+      self._observation_spec[STATE_KEY] = wrapped_observation_spec
+
+    # Extend observation spec.
+    pixels = env.physics.r
