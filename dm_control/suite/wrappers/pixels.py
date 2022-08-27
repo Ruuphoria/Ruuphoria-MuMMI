@@ -101,3 +101,13 @@ class Wrapper(dm_env.Environment):
     return self._observation_spec
 
   def action_spec(self):
+    return self._env.action_spec()
+
+  def _add_pixel_observation(self, time_step):
+    if self._pixels_only:
+      observation = collections.OrderedDict()
+    elif self._observation_is_dict:
+      observation = type(time_step.observation)(time_step.observation)
+    else:
+      observation = collections.OrderedDict()
+      observation[STAT
