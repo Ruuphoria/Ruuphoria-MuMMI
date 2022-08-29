@@ -1,0 +1,291 @@
+
+import argparse
+import collections
+import functools
+import json
+import os
+import pathlib
+import sys
+import time
+
+os.environ['TF_CPP_MIN_LOG_LEtouch'] = '3'
+os.environ['MUJOCO_GL'] = 'egl'
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.mixed_precision import experimental as prec
+
+tf.get_logger().setLevel('ERROR')
+
+from tensorflow_probability import distributions as tfd
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
+import models
+import tools
+import wrappers
+from config import define_config as define_config 
+from tools import cal_result
+
+class Dreamer(tools.Module):
+
+    def __init__(self, config, datadir, actspace, writer):
+        self._c = config
+        self._actspace = actspace
+        self._actdim = actspace.n if hasattr(actspace, 'n') else actspace.shape[0]
+        self._writer = writer
+        self._random = np.random.RandomState(config.seed)
+        with tf.device('cpu:0'):
+            self._step = tf.Variable(count_steps(datadir, config), dtype=tf.int64)
+        self._should_pretrain = tools.Once()
+        self._should_train = tools.Every(config.train_every)
+        self._should_log = tools.Every(config.log_every)
+        self._last_log = None
+        self._last_time = time.time()
+        self._metrics = collections.defaultdict(tf.metrics.Mean)
+        self._metrics['expl_amount']  # Create variable for checkpoint.
+        self._float = prec.global_policy().compute_dtype
+        self._strategy = tf.distribute.MirroredStrategy()
+        with self._strategy.scope():
+            self._dataset = iter(self._strategy.experimental_distribute_dataset(
+                load_dataset(datadir, self._c)))
+            self._build_model()
+
+    def __call__(self, obs, reset, state=None, training=True):
+        step = self._step.numpy().item()
+        tf.summary.experimental.set_step(step)
+        if state is not None and reset.any():
+            mask = tf.cast(1 - reset, self._float)[:, None]
+            state = tf.nest.map_structure(lambda x: x * mask, state)
+        if self._should_train(step) and not self._c.test:
+            log = self._should_log(step)
+            n = self._c.pretrain if self._should_pretrain() else self._c.train_steps
+            print(f'Training for {n} steps.')
+            with self._strategy.scope():
+                for train_step in range(n):
+                    log_images = self._c.log_images and log and train_step == 0
+                    self.train(next(self._dataset), log_images)
+            if log:
+                self._write_summaries()
+        action, state = self.policy(obs, state, training)
+        if training:
+            self._step.assign_add(len(reset) * self._c.action_repeat)
+        return action, state
+
+    @tf.function
+    def policy(self, obs, state, training):
+        if state is None:
+            latent = self._dynamics.initial(len(obs['image']))
+            action = tf.zeros((len(obs['image']), self._actdim), self._float)
+        else:
+            latent, action = state
+
+        obs = preprocess(obs, self._c)
+        embed = self._encode_img(obs)
+        if self._c.multi_modal:
+            embed_depth = self._encode_dep(obs)  
+            embed_touch = self._encode_touch(obs["touch"])
+            embed_audio = self._encode_audio(obs["audio"])
+            embed = tf.concat([embed, embed_depth, embed_touch, embed_audio], -1)
+
+        latent, _ = self._dynamics.obs_step(latent, action, embed)
+        feat = self._dynamics.get_feat(latent)
+
+        if training:
+            action = self._actor(feat).sample()
+        else:
+            action = self._actor(feat).mode()
+        action = self._exploration(action, training)
+        state = (latent, action)
+        return action, state
+
+    def load(self, filename):
+        super().load(filename)
+        self._should_pretrain()
+
+    @tf.function()
+    def train(self, data, log_images=False):
+        self._strategy.experimental_run_v2(self._train, args=(data, log_images))
+        # self._train(data, log_images)
+
+    def _train(self, data, log_images):
+        with tf.GradientTape() as model_tape:
+            embed = self._encode_img(data)  # * data["img_flag"]
+            if self._c.multi_modal:
+                embed_depth = self._encode_dep(data)
+                embed_touch = self._encode_touch(data["touch"])
+                embed_audio = self._encode_audio(data["audio"])
+                embed = tf.concat([embed, embed_depth, embed_touch, embed_audio], -1)
+
+            post, prior = self._dynamics.observe(embed, data['action'])
+            feat = self._dynamics.get_feat(post)
+            image_pred = self._decode_img(feat)
+            reward_pred = self._reward(feat)
+            if self._c.multi_modal:
+                depth_pred = self._decode_dep(feat)
+                touch_pred = self._decode_touch(feat)
+                audio_pred = self._decode_audio(feat)
+
+            likes = tools.AttrDict()
+            recon_img = image_pred.log_prob(data['image']) * tf.squeeze(data["img_flag"])
+            likes.image = tf.reduce_mean(recon_img)
+            if self._c.multi_modal:
+                recon_dep = depth_pred.log_prob(data['depth']) * tf.squeeze(data["dep_flag"])
+                recon_touch = touch_pred.log_prob(data['touch']) * tf.squeeze(data["touch_flag"])
+                recon_audio = audio_pred.log_prob(data['audio']) * tf.squeeze(data["audio_flag"])
+                likes.depth = tf.reduce_mean(recon_dep)
+                likes.touch = tf.reduce_mean(recon_touch)
+                likes.audio = tf.reduce_mean(recon_audio)
+
+            likes.reward = tf.reduce_mean(reward_pred.log_prob(data['reward']))
+            if self._c.pcont:
+                pcont_pred = self._pcont(feat)
+                pcont_target = self._c.discount * data['discount']
+                likes.pcont = tf.reduce_mean(pcont_pred.log_prob(pcont_target))
+                likes.pcont *= self._c.pcont_scale
+            prior_dist = self._dynamics.get_dist(prior)
+            post_dist = self._dynamics.get_dist(post)
+            div = tf.reduce_mean(tfd.kl_divergence(post_dist, prior_dist))
+            div = tf.maximum(div, self._c.free_nats)
+            model_loss = self._c.kl_scale * div - sum(likes.values())
+            model_loss /= float(self._strategy.num_replicas_in_sync)
+
+        with tf.GradientTape() as actor_tape:
+            imag_feat = self._imagine_ahead(post)
+            reward = self._reward(imag_feat).mode()
+            if self._c.pcont:
+                pcont = self._pcont(imag_feat).mean()
+            else:
+                pcont = self._c.discount * tf.ones_like(reward)
+            value = self._value(imag_feat).mode()
+            returns = tools.lambda_return(
+                reward[:-1], value[:-1], pcont[:-1],
+                bootstrap=value[-1], lambda_=self._c.disclam, axis=0)
+            discount = tf.stop_gradient(tf.math.cumprod(tf.concat(
+                [tf.ones_like(pcont[:1]), pcont[:-2]], 0), 0))
+            actor_loss = -tf.reduce_mean(discount * returns)
+            actor_loss /= float(self._strategy.num_replicas_in_sync)
+
+        with tf.GradientTape() as value_tape:
+            value_pred = self._value(imag_feat)[:-1]
+            target = tf.stop_gradient(returns)
+            value_loss = -tf.reduce_mean(discount * value_pred.log_prob(target))
+            value_loss /= float(self._strategy.num_replicas_in_sync)
+
+        model_norm = self._model_opt(model_tape, model_loss)
+        actor_norm = self._actor_opt(actor_tape, actor_loss)
+        value_norm = self._value_opt(value_tape, value_loss)
+
+        if tf.distribute.get_replica_context().replica_id_in_sync_group == 0:
+            if self._c.log_scalars:
+                self._scalar_summaries(
+                    data, feat, prior_dist, post_dist, likes, div,
+                    model_loss, value_loss, actor_loss, model_norm, value_norm,
+                    actor_norm)
+            if tf.equal(log_images, True):
+                self._image_summaries(data, embed, image_pred)
+
+    def _build_model(self):
+        acts = dict(
+            elu=tf.nn.elu, relu=tf.nn.relu, swish=tf.nn.swish,
+            leaky_relu=tf.nn.leaky_relu)
+        cnn_act = acts[self._c.cnn_act]
+        touch_shape = {"dmc_walker_walk": (2,), "dmc_quadruped_walk": (4,), "dmc_finger_spin": (2,),
+                       "dmc_cheetah_run": (2,)}
+        audio_shape = {"dmc_walker_walk": (8820,), "dmc_quadruped_walk": (8820,), "dmc_finger_spin": (8820,),
+                       "dmc_cheetah_run": (8820,)}
+        act = acts[self._c.dense_act]
+        # self._encode = models.ConvEncoder(self._c.cnn_depth, cnn_act) # Yong Lee, modified
+        self._encode_img = models.ConvEncoder(self._c.cnn_depth, cnn_act, modality="image")
+        self._encode_dep = models.ConvEncoder(self._c.cnn_depth, cnn_act, modality="depth")
+        self._encode_touch = models.Dense(n=4, d_hidden=128, d_out=1024, name="touch")
+        self._encode_audio = models.Dense(n=4, d_hidden=128, d_out=1024, name="audio")
+        self._dynamics = models.RSSM(self._c.stoch_size, self._c.deter_size, self._c.deter_size)
+        self._decode_img = models.ConvDecoder(self._c.cnn_depth, cnn_act, modality="image")
+        self._decode_dep = models.ConvDecoder(self._c.cnn_depth, cnn_act, shape=(64, 64, 1), modality="depth")
+        self._decode_touch = models.DenseDecoder(touch_shape[self._c.task], 3, 96, act=act, name="touch")
+        self._decode_audio = models.DenseDecoder(audio_shape[self._c.task], 3, 96, act=act, name="audio")
+        self._reward = models.DenseDecoder((), 2, self._c.num_units, act=act, name="reward")
+        if self._c.pcont:
+            self._pcont = models.DenseDecoder((), 3, self._c.num_units, 'binary', act=act)
+        self._value = models.DenseDecoder((), 3, self._c.num_units, act=act)
+        self._actor = models.ActionDecoder(self._actdim, 4, self._c.num_units, self._c.action_dist,
+                                           init_std=self._c.action_init_std, act=act)
+        model_modules = [self._encode_img, self._encode_dep, self._encode_touch, self._encode_audio,
+                         self._dynamics, self._decode_img, self._decode_dep, self._decode_touch, self._decode_audio,
+                         self._reward]
+        if self._c.pcont:
+            model_modules.append(self._pcont)
+        Optimizer = functools.partial(
+            tools.Adam, wd=self._c.weight_decay, clip=self._c.grad_clip, wdpattern=self._c.weight_decay_pattern)
+        self._model_opt = Optimizer('model', model_modules, self._c.model_lr)
+        self._value_opt = Optimizer('value', [self._value], self._c.value_lr)
+        self._actor_opt = Optimizer('actor', [self._actor], self._c.actor_lr)
+        # Do a train step to initialize all variables, including optimizer
+        # statistics. Ideally, we would use batch size zero, but that doesn't work
+        # in multi-GPU mode.
+        self.train(next(self._dataset))
+
+    def _exploration(self, action, training):
+        if training:
+            amount = self._c.expl_amount
+            if self._c.expl_decay:
+                amount *= 0.5 ** (tf.cast(self._step, tf.float32) / self._c.expl_decay)
+            if self._c.expl_min:
+                amount = tf.maximum(self._c.expl_min, amount)
+            self._metrics['expl_amount'].update_state(amount)
+        elif self._c.eval_noise:
+            amount = self._c.eval_noise
+        else:
+            return action
+        if self._c.expl == 'additive_gaussian':
+            return tf.clip_by_value(tfd.Normal(action, amount).sample(), -1, 1)
+        if self._c.expl == 'completely_random':
+            return tf.random.uniform(action.shape, -1, 1)
+        if self._c.expl == 'epsilon_greedy':
+            indices = tfd.Categorical(0 * action).sample()
+            return tf.where(
+                tf.random.uniform(action.shape[:1], 0, 1) < amount,
+                tf.one_hot(indices, action.shape[-1], dtype=self._float),
+                action)
+        raise NotImplementedError(self._c.expl)
+
+    def _imagine_ahead(self, post):
+        if self._c.pcont:  # Last step could be terminal.
+            post = {k: v[:, :-1] for k, v in post.items()}
+        flatten = lambda x: tf.reshape(x, [-1] + list(x.shape[2:]))
+        start = {k: flatten(v) for k, v in post.items()}
+        policy = lambda state: self._actor(
+            tf.stop_gradient(self._dynamics.get_feat(state))).sample()
+        states = tools.static_scan(
+            lambda prev, _: self._dynamics.img_step(prev, policy(prev)),
+            tf.range(self._c.horizon), start)
+        imag_feat = self._dynamics.get_feat(states)
+        return imag_feat
+
+    def _scalar_summaries(
+            self, data, feat, prior_dist, post_dist, likes, div,
+            model_loss, value_loss, actor_loss, model_norm, value_norm,
+            actor_norm):
+        self._metrics['model_grad_norm'].update_state(model_norm)
+        self._metrics['value_grad_norm'].update_state(value_norm)
+        self._metrics['actor_grad_norm'].update_state(actor_norm)
+        self._metrics['prior_ent'].update_state(prior_dist.entropy())
+        self._metrics['post_ent'].update_state(post_dist.entropy())
+        for name, logprob in likes.items():
+            self._metrics[name + '_loss'].update_state(-logprob)
+        self._metrics['div'].update_state(div)
+        self._metrics['model_loss'].update_state(model_loss)
+        self._metrics['value_loss'].update_state(value_loss)
+        self._metrics['actor_loss'].update_state(actor_loss)
+        self._metrics['action_ent'].update_state(self._actor(feat).entropy())
+
+    def _image_summaries(self, data, embed, image_pred):
+        truth = data['image'][:6] + 0.5
+        recon = image_pred.mode()[:6]
+        init, _ = self._dynamics.observe(embed[:6, :5], data['action'][:6, :5])
+        init = {k: v[:, -1] for k, v in init.items()}
+        prior = self._dynamics.imagine(data['action'][:6, 5:], init)
+        openl = self._decode_img(self._dynamics.get_feat(prior)).mode()
+        model = tf.concat([recon[:, :5] + 0.5, openl + 0.5], 1)
+        error = (model - truth + 1) / 2
