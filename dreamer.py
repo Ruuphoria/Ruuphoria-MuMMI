@@ -289,3 +289,225 @@ class Dreamer(tools.Module):
         openl = self._decode_img(self._dynamics.get_feat(prior)).mode()
         model = tf.concat([recon[:, :5] + 0.5, openl + 0.5], 1)
         error = (model - truth + 1) / 2
+        openl = tf.concat([truth, model, error], 2)
+        tools.graph_summary(self._writer, tools.video_summary, 'agent/openl', openl)
+
+    def _write_summaries(self):
+        step = int(self._step.numpy())
+        metrics = [(k, float(v.result())) for k, v in self._metrics.items()]
+        if self._last_log is not None:
+            duration = time.time() - self._last_time
+            self._last_time += duration
+            metrics.append(('fps', (step - self._last_log) / duration))
+        self._last_log = step
+        [m.reset_states() for m in self._metrics.values()]
+        with (self._c.logdir / 'metrics.jsonl').open('a') as f:
+            f.write(json.dumps({'step': step, **dict(metrics)}) + '\n')
+        [tf.summary.scalar('agent/' + k, m) for k, m in metrics]
+        print(f'[{step}]', ' / '.join(f'{k} {v:.1f}' for k, v in metrics))
+        self._writer.flush()
+
+
+def preprocess(obs, config):
+    dtype = prec.global_policy().compute_dtype
+    obs = obs.copy()
+    with tf.device('cpu:0'):
+        obs['image'] = tf.cast(obs['image'], dtype) / 255.0 - 0.5
+        obs['depth'] = tf.cast(obs['depth'], dtype) / 200.0 - 0.5
+        obs['touch'] = tf.cast(obs['touch'], dtype)
+        clip_rewards = dict(none=lambda x: x, tanh=tf.tanh)[config.clip_rewards]
+        obs['reward'] = clip_rewards(obs['reward'])
+    return obs
+
+
+def count_steps(datadir, config):
+    return tools.count_episodes(datadir)[1] * config.action_repeat
+
+
+def load_dataset(directory, config):
+    episode = next(tools.load_episodes(directory, 1))
+    types = {k: v.dtype for k, v in episode.items()}
+    shapes = {k: (None,) + v.shape[1:] for k, v in episode.items()}
+    generator = lambda: tools.load_episodes(
+        directory, config.train_steps, config.batch_length,
+        config.dataset_balance)
+    dataset = tf.data.Dataset.from_generator(generator, types, shapes)
+    dataset = dataset.batch(config.batch_size, drop_remainder=True)
+    dataset = dataset.map(functools.partial(preprocess, config=config))
+    dataset = dataset.prefetch(10)
+    return dataset
+
+
+def summarize_episode(episode, config, datadir, writer, prefix):
+    episodes, steps = tools.count_episodes(datadir)
+    length = (len(episode['reward']) - 1) * config.action_repeat
+    ret = episode['reward'].sum()
+    print(f'{prefix.title()} episode of length {length} with return {ret:.1f}.')
+    metrics = [
+        (f'{prefix}/return', float(episode['reward'].sum())),
+        (f'{prefix}/length', len(episode['reward']) - 1),
+        (f'episodes', episodes)]
+    step = count_steps(datadir, config)
+    if config.test:
+        with (config.logdir / 'results.jsonl').open('a') as f:
+            f.write(json.dumps(dict([('step', step)] + metrics)) + '\n')
+    else:
+        with (config.logdir / 'metrics.jsonl').open('a') as f:
+            f.write(json.dumps(dict([('step', step)] + metrics)) + '\n')
+    with writer.as_default():  # Env might run in a different thread.
+        tf.summary.experimental.set_step(step)
+        [tf.summary.scalar('sim/' + k, v) for k, v in metrics]
+        if prefix == 'test':
+            tools.video_summary(f'sim/{prefix}/video', episode['image'][None])
+
+
+def make_env(config, writer, prefix, datadir, store):
+    suite, task = config.task.split('_', 1)
+    if suite == 'dmc':
+        env = wrappers.DeepMindControl(task)
+        env = wrappers.ActionRepeat(env, config.action_repeat)
+        env = wrappers.NormalizeActions(env)
+        if config.natural:
+            data = tools.load_imgnet(store)
+            env = wrappers.NaturalMujoco(env, data)
+            audio_data = tools.load_audio(store)
+            env = wrappers.AudioMujoco(env, audio_data)
+            env = wrappers.MissingMultimodal(env, config)
+    elif suite == 'atari':
+        env = wrappers.Atari(
+            task, config.action_repeat, (64, 64), grayscale=False,
+            life_done=True, sticky_actions=True)
+        env = wrappers.OneHotAction(env)
+    else:
+        raise NotImplementedError(suite)
+    env = wrappers.TimeLimit(env, config.time_limit / config.action_repeat)
+    callbacks = []
+    if store:
+        callbacks.append(lambda ep: tools.save_episodes(datadir, [ep]))
+    callbacks.append(
+        lambda ep: summarize_episode(ep, config, datadir, writer, prefix))
+    env = wrappers.Collect(env, callbacks, config.precision)
+    env = wrappers.RewardObs(env)
+    return env
+
+
+def main(config):
+    if config.gpu_growth:
+        for gpu in tf.config.experimental.list_physical_devices('GPU'):
+            tf.config.experimental.set_memory_growth(gpu, True)
+    assert config.precision in (16, 32), config.precision
+    if config.precision == 16:
+        prec.set_policy(prec.Policy('mixed_float16'))
+    config.steps = int(config.steps)
+    config.logdir.mkdir(parents=True, exist_ok=True)
+    print('Logdir', config.logdir)
+
+    # Create environments.
+    datadir = config.logdir / 'episodes'
+    writer = tf.summary.create_file_writer(
+        str(config.logdir), max_queue=1000, flush_millis=20000)
+    writer.set_as_default()
+    train_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'train', datadir, store=True), config.parallel)
+                  for _ in range(config.envs)]
+    test_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'test', datadir, store=False), config.parallel)
+                 for _ in range(config.envs)]
+    actspace = train_envs[0].action_space
+
+    # Prefill dataset with random episodes.
+    step = count_steps(datadir, config)
+    prefill = max(0, config.prefill - step)
+    print(f'Prefill dataset with {prefill} steps.')
+    random_agent = lambda o, d, _: ([actspace.sample() for _ in d], None)
+    tools.simulate(random_agent, train_envs, prefill / config.action_repeat)
+    writer.flush()
+
+    # Train and regularly evaluate the agent.
+    step = count_steps(datadir, config)
+    print(f'Simulating agent for {config.steps - step} steps.')
+    agent = Dreamer(config, datadir, actspace, writer)
+    if (config.logdir / 'variables.pkl').exists():
+        print('Load checkpoint.')
+        agent.load(config.logdir / 'variables.pkl')
+    state = None
+    while step < config.steps:
+        print('Start evaluation.')
+        tools.simulate(
+            functools.partial(agent, training=False), test_envs, episodes=1)
+        writer.flush()
+        print('Start collection.')
+        steps = config.eval_every // config.action_repeat
+        state = tools.simulate(agent, train_envs, steps, state=state)
+        step = count_steps(datadir, config)
+        agent.save(config.logdir / 'variables.pkl')
+    for env in train_envs + test_envs:
+        env.close()
+
+
+def test(config):
+    if config.gpu_growth:
+        for gpu in tf.config.experimental.list_physical_devices('GPU'):
+            tf.config.experimental.set_memory_growth(gpu, True)
+    assert config.precision in (16, 32), config.precision
+    if config.precision == 16:
+        prec.set_policy(prec.Policy('mixed_float16'))
+    config.steps = int(config.steps)
+    config.logdir.mkdir(parents=True, exist_ok=True)
+    print('Logdir', config.logdir)
+
+    # Create environments.
+    datadir = config.logdir / 'episodes'
+    writer = tf.summary.create_file_writer(
+        str(config.logdir), max_queue=1000, flush_millis=20000)
+    writer.set_as_default()
+    test_envs = [wrappers.Async(lambda: make_env(
+        config, writer, 'test', datadir, store=False), config.parallel)
+                 for _ in range(config.envs)]
+    actspace = test_envs[0].action_space
+
+    # Train and regularly evaluate the agent.
+    step = count_steps(datadir, config)
+    print(f'Simulating agent for {config.steps - step} steps.')
+    agent = Dreamer(config, datadir, actspace, writer)
+    if (config.logdir / 'variables.pkl').exists():
+        print('Load checkpoint.')
+        agent.load(config.logdir / 'variables.pkl')
+
+    m_list = [0.0, 0.05, 0.1]
+    for miss_r in m_list:
+        config.miss_ratio = {"image": miss_r, "depth": miss_r, "touch": miss_r, "audio": miss_r}
+        test_envs = [wrappers.Async(lambda: make_env(
+            config, writer, 'test', datadir, store=False), config.parallel)
+                     for _ in range(config.envs)]
+        print('Missing Ratio:', miss_r)
+        n_traj = 10
+        for _ in range(n_traj):
+            print('Start evaluation.')
+            tools.simulate(
+                functools.partial(agent, training=False), test_envs, episodes=1)
+            writer.flush()
+        for env in test_envs:
+            env.close()
+
+        filename = config.logdir / 'results.jsonl'
+        cal_result(str(filename), n_traj)
+
+
+
+if __name__ == '__main__':
+    try:
+        import colored_traceback
+
+        colored_traceback.add_hook()
+    except ImportError:
+        pass
+    parser = argparse.ArgumentParser()
+    for key, value in define_config().items():
+        parser.add_argument(f'--{key}', type=tools.args_type(value), default=value)
+
+    config = parser.parse_args()
+    if config.test:
+        test(config)
+    else:
+        main(config)
