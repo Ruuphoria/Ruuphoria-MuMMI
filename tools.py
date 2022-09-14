@@ -422,3 +422,105 @@ def static_scan_action(fn1, fn2, inputs, start, reverse=False):
     actions = []
     if reverse:
         indices = reversed(indices)
+    for index in indices:
+        inp = tf.nest.map_structure(lambda x: x[index], inputs)
+        action = fn2(last)
+        last = fn1(last, action, inp)
+        [o.append(l) for o, l in zip(outputs, tf.nest.flatten(last))]
+        actions.append(action)
+    if reverse:
+        outputs = [list(reversed(x)) for x in outputs]
+    outputs = [tf.stack(x, 0) for x in outputs]
+    return tf.nest.pack_sequence_as(start, outputs), actions[0]
+
+
+def _mnd_sample(self, sample_shape=(), seed=None, name='sample'):
+    return tf.random.normal(
+        tuple(sample_shape) + tuple(self.event_shape),
+        self.mean(), self.stddev(), self.dtype, seed, name)
+
+
+tfd.MultivariateNormalDiag.sample = _mnd_sample
+
+
+def _cat_sample(self, sample_shape=(), seed=None, name='sample'):
+    assert len(sample_shape) in (0, 1), sample_shape
+    assert len(self.logits_parameter().shape) == 2
+    indices = tf.random.categorical(
+        self.logits_parameter(), sample_shape[0] if sample_shape else 1,
+        self.dtype, seed, name)
+    if not sample_shape:
+        indices = indices[..., 0]
+    return indices
+
+
+tfd.Categorical.sample = _cat_sample
+
+
+class Every:
+
+    def __init__(self, every):
+        self._every = every
+        self._last = None
+
+    def __call__(self, step):
+        if self._last is None:
+            self._last = step
+            return True
+        if step >= self._last + self._every:
+            self._last += self._every
+            return True
+        return False
+
+
+class Once:
+
+    def __init__(self):
+        self._once = True
+
+    def __call__(self):
+        if self._once:
+            self._once = False
+            return True
+        return False
+
+
+def load_imgnet(train):
+    import pickle
+    name = 'train' if train else 'valid'
+
+    with open('./natural_{}.pkl'.format(name), 'rb') as fin:
+        imgnet = pickle.load(fin)
+
+    imgnet = np.transpose(imgnet, axes=(0, 1, 3, 4, 2))
+    return imgnet
+
+
+def load_audio(train):
+    import pickle
+    name = 'train' if train else 'valid'
+
+    with open('./audio.pkl', 'rb') as fin:
+        audio = pickle.load(fin)
+
+    return audio
+
+
+def cal_result(filename, n_traj=10):
+    returns = list()
+    with open(filename, "r", encoding='utf-8') as f:
+        for line in f.readlines():
+            json_data = json.loads(line)
+            returns.append(json_data.get("test/return", np.nan))
+
+    returns = np.array(returns)
+    print(f"Results:{returns[-n_traj:]}")
+    print(f"Mean:{np.nanmean(returns[-n_traj:])}\tstd:{np.nanstd(returns[-n_traj:])}")
+    return np.nanmean(returns), np.nanstd(returns)
+
+
+if __name__ == '__main__':
+    data = load_imgnet(True)
+    import ipdb
+
+    ipdb.set_trace()
