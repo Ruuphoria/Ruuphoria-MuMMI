@@ -191,3 +191,306 @@ class Collect:
     def _convert(self, value):
         value = np.array(value)
         if np.issubdtype(value.dtype, np.floating):
+            dtype = {16: np.float16, 32: np.float32, 64: np.float64}[self._precision]
+        elif np.issubdtype(value.dtype, np.signedinteger):
+            dtype = {16: np.int16, 32: np.int32, 64: np.int64}[self._precision]
+        elif np.issubdtype(value.dtype, np.uint8):
+            dtype = np.uint8
+        else:
+            raise NotImplementedError(value.dtype)
+        return value.astype(dtype)
+
+
+class TimeLimit:
+
+    def __init__(self, env, duration):
+        self._env = env
+        self._duration = duration
+        self._step = None 
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def step(self, action):
+        assert self._step is not None, 'Must reset environment.'
+        obs, reward, done, info = self._env.step(action)
+        self._step += 1
+        if self._step >= self._duration:
+            done = True 
+            if 'discount' not in info: 
+                info['discount'] = np.array(1.0).astype(np.float32)
+            self._step = None
+        return obs, reward, done, info
+
+    def reset(self):
+        self._step = 0
+        return self._env.reset()
+
+
+class NaturalMujoco:
+
+    def __init__(self, env, dataset):
+        self.dataset = dataset
+        self._pointer = (np.random.randint(self.dataset.shape[0]), 0)
+        self._env = env
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def step(self, action):
+        obs, reward, done, info = self._env.step(action)
+        obs = self._noisify_obs(obs, done)
+        return obs, reward, done, info
+
+    def _noisify_obs(self, obs, done):
+        obs = obs.copy()
+        img = obs['image']
+        video_id, img_id = self._pointer
+
+        # ugly hack to extract only yellow pixels
+        fgmask = (img[:, :, 0] > 100)[:, :, None].repeat(3, axis=2)
+        if done:
+            video_id = np.random.randint(self.dataset.shape[0])
+            img_id = 0
+        else:
+            img_id = (img_id + 1) % self.dataset.shape[1]
+        background = self.dataset[video_id, img_id]
+        img = img * fgmask + background * (~fgmask)
+        self._pointer = (video_id, img_id)
+        obs['image'] = img
+        return obs
+
+    def reset(self):
+        obs = self._env.reset()
+        obs = self._noisify_obs(obs, False)
+        return obs
+
+
+class AudioMujoco:
+    """
+    add background/contact sound for MuJoCo task
+    """
+
+    def __init__(self, env, sound):
+        self._sound = sound
+        self._env = env
+        self._ncon = 0
+        self._t = 0
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def step(self, action):
+        obs, reward, done, info = self._env.step(action)
+        obs = self._sound_obs(obs, done)
+        return obs, reward, done, info
+
+    def reset(self):
+        obs = self._env.reset()
+        obs = self._sound_obs(obs, False)
+        return obs
+
+    def _sound_obs(self, obs, done):
+        obs = obs.copy()
+        return obs
+
+
+class MissingMultimodal:
+
+    def __init__(self, env, config):
+        self._env = env
+        self._c = config
+        self._t = 0
+        self._drop_end = dict()
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def step(self, action):
+        obs, reward, done, info = self._env.step(action)
+        obs = self._missing_obs(obs)
+        self._t += 1
+        return obs, reward, done, info
+
+    def _missing_obs(self, obs):
+        obs_c = obs.copy()
+        for key, value in obs.items(): 
+            if key in self._c.miss_ratio: 
+                value_f = value
+                flag = np.array([1]).astype(np.float16)
+                if self._t < self._drop_end.get(key, 0):
+                    value_f = 0 * value
+                    flag = 0 * flag
+                elif np.random.rand() <= self._c.miss_ratio.get(key, -1.0): 
+                    value_f = 0 * value
+                    flag = 0 * flag
+                    self._drop_end[key] = self._t + np.random.randint(1, self._c.max_miss_len)
+                obs_c[key] = value_f
+                obs_c[key + '_flag'] = flag
+        return obs_c
+
+    def reset(self):
+        self._t = 0
+        self._drop_end = dict()
+        obs = self._env.reset()
+        obs = self._missing_obs(obs)
+        return obs
+
+class ActionRepeat:
+    def __init__(self, env, amount):
+        self._env = env
+        self._amount = amount
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    def step(self, action):
+        done = False
+        total_reward = 0
+        current_step = 0
+        while current_step < self._amount and not done:
+            obs, reward, done, info = self._env.step(action)
+            total_reward += reward
+            current_step += 1
+        return obs, total_reward, done, info
+
+
+class NormalizeActions:
+    def __init__(self, env):
+        self._env = env
+        self._mask = np.logical_and(
+            np.isfinite(env.action_space.low),
+            np.isfinite(env.action_space.high))
+        self._low = np.where(self._mask, env.action_space.low, -1)
+        self._high = np.where(self._mask, env.action_space.high, 1)
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    @property
+    def action_space(self):
+        low = np.where(self._mask, -np.ones_like(self._low), self._low)
+        high = np.where(self._mask, np.ones_like(self._low), self._high)
+        return gym.spaces.Box(low, high, dtype=np.float32)
+
+    def step(self, action):
+        original = (action + 1) / 2 * (self._high - self._low) + self._low
+        original = np.where(self._mask, original, action)
+        return self._env.step(original)
+
+
+class ObsDict:
+
+    def __init__(self, env, key='obs'):
+        self._env = env
+        self._key = key
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    @property
+    def observation_space(self):
+        spaces = {self._key: self._env.observation_space}
+        return gym.spaces.Dict(spaces)
+
+    @property
+    def action_space(self):
+        return self._env.action_space
+
+    def step(self, action):
+        obs, reward, done, info = self._env.step(action)
+        obs = {self._key: np.array(obs)}
+        return obs, reward, done, info
+
+    def reset(self):
+        obs = self._env.reset()
+        obs = {self._key: np.array(obs)}
+        return obs
+
+
+class OneHotAction:
+
+    def __init__(self, env):
+        assert isinstance(env.action_space, gym.spaces.Discrete)
+        self._env = env
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    @property
+    def action_space(self):
+        shape = (self._env.action_space.n,)
+        space = gym.spaces.Box(low=0, high=1, shape=shape, dtype=np.float32)
+        space.sample = self._sample_action
+        return space
+
+    def step(self, action):
+        index = np.argmax(action).astype(int)
+        reference = np.zeros_like(action)
+        reference[index] = 1
+        if not np.allclose(reference, action):
+            raise ValueError(f'Invalid one-hot action:\n{action}')
+        return self._env.step(index)
+
+    def reset(self):
+        return self._env.reset()
+
+    def _sample_action(self):
+        actions = self._env.action_space.n
+        index = self._random.randint(0, actions)
+        reference = np.zeros(actions, dtype=np.float32)
+        reference[index] = 1.0
+        return reference
+
+
+class RewardObs:
+
+    def __init__(self, env):
+        self._env = env
+
+    def __getattr__(self, name):
+        return getattr(self._env, name)
+
+    @property
+    def observation_space(self):
+        spaces = self._env.observation_space.spaces
+        assert 'reward' not in spaces
+        spaces['reward'] = gym.spaces.Box(-np.inf, np.inf, dtype=np.float32)
+        return gym.spaces.Dict(spaces)
+
+    def step(self, action):
+        obs, reward, done, info = self._env.step(action)
+        obs['reward'] = reward
+        return obs, reward, done, info
+
+    def reset(self):
+        obs = self._env.reset()
+        obs['reward'] = 0.0
+        return obs
+
+
+class Async:
+
+    _ACCESS = 1
+    _CALL = 2
+    _RESULT = 3
+    _EXCEPTION = 4
+    _CLOSE = 5
+
+    def __init__(self, ctor, strategy='process'):
+        self._strategy = strategy
+        if strategy == 'none':
+            self._env = ctor()
+        elif strategy == 'thread':
+            import multiprocessing.dummy as mp
+        elif strategy == 'process':
+            import multiprocessing as mp
+        else:
+            raise NotImplementedError(strategy)
+        if strategy != 'none':
+            self._conn, conn = mp.Pipe()
+            self._process = mp.Process(target=self._worker, args=(ctor, conn))
+            atexit.register(self.close)
+            self._process.start()
+        self._obs_space = None
+        self._action_space = None
