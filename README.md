@@ -4,4 +4,8 @@ This refined repository contains the code for the paper [Multi-Modal Mutual Info
 
 ## Introduction
 
-This work focuses on learning useful and robust deep world models using multiple, possibly unreliable, sensors. We find that current methods do not sufficiently encourage a shared representation between modali
+This work focuses on learning useful and robust deep world models using multiple, possibly unreliable, sensors. We find that current methods do not sufficiently encourage a shared representation between modalities; this can cause poor performance on downstream tasks and over-reliance on specific sensors. This version of the codebase brings improvements on these fronts and aims to further enhance the results produced by the method.
+
+## Environment Setup
+
+The code is tested on Ubuntu 16.04, Python 3.7 and CUDA
