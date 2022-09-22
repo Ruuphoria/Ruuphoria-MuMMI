@@ -19,4 +19,13 @@ To run this codebase or baselines on mujoco, follow the steps outlined in the Us
 To cite this work, please use the following citation:
 
 ```
-@inproceedings{
+@inproceedings{Chen2021MuMMI,
+title={Multi-Modal Mutual Information (MuMMI) Training for Robust Self-Supervised Deep Reinforcement Learning},
+author={Kaiqi Chen and Yong Lee and Harold Soh},
+year={2021},
+booktitle={IEEE International Conference on Robotics and Automation (ICRA)}}
+```
+
+### Acknowledgement
+
+This repo contains 
