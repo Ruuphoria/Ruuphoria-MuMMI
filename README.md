@@ -8,4 +8,15 @@ This work focuses on learning useful and robust deep world models using multiple
 
 ## Environment Setup
 
-The code is tested on Ubuntu 16.04, Python 3.7 and CUDA
+The code is tested on Ubuntu 16.04, Python 3.7 and CUDA 10.2. Please download the relevant Python packages by running the mentioned commands.
+
+## Usage
+
+To run this codebase or baselines on mujoco, follow the steps outlined in the Usage Instructions section.
+
+### BibTeX
+
+To cite this work, please use the following citation:
+
+```
+@inproceedings{
