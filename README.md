@@ -28,4 +28,7 @@ booktitle={IEEE International Conference on Robotics and Automation (ICRA)}}
 
 ### Acknowledgement
 
-This repo contains 
+This repo contains code that's based on the following repos: [Yusufma03/CVRL](https://github.com/Yusufma03/CVRL). Modified and refined by Ruuphoria.
+
+### References
+**[Ma et al., 2020]** Xiao Ma, Siwei Chen, David Hsu, Wee Sun Lee: Contrastive Variational Model-Based Reinforcement Learning for Complex Observations. In CoRL, 2020.
